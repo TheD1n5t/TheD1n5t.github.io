@@ -1,0 +1,118 @@
+!DOCTYPE html
+html lang=en
+head
+  meta charset=UTF-8
+  meta name=viewport content=width=device-width, initial-scale=1.0
+  titleIonia Challengetitle
+  style
+    body {
+      background-color #0e1629;
+      font-family Arial, sans-serif;
+      color white;
+      text-align center;
+    }
+    h1 {
+      margin-top 20px;
+    }
+    .rank {
+      font-size 1.2em;
+      margin-bottom 10px;
+    }
+    .grid {
+      display grid;
+      grid-template-columns repeat(auto-fit, minmax(150px, 1fr));
+      gap 10px;
+      padding 20px;
+      max-width 1000px;
+      margin auto;
+    }
+    .champion {
+      background-color #122038;
+      border 2px solid #1f3b5c;
+      padding 10px;
+      border-radius 8px;
+    }
+    .champion img {
+      width 50px;
+      border-radius 50%;
+    }
+    .champion-name {
+      font-weight bold;
+      margin 5px 0;
+    }
+    .score {
+      font-size 0.9em;
+    }
+    .win, .loss {
+      cursor pointer;
+      padding 2px 6px;
+      margin 0 4px;
+      border-radius 4px;
+    }
+    .win { background #3fa34d; }
+    .loss { background #d44d5c; }
+  style
+head
+body
+  h1IONIA CHALLENGEh1
+  div class=rank id=rankDisplayGold II – 0 LPbr0 Gamesdiv
+
+  div class=grid id=championGriddiv
+
+  script
+    const champions = [
+      Ahri, Akali, Hwei, Irelia, Ivern,
+      Jhin, Karma, Kayn, Kennen, Lee Sin,
+      Lillia, Master Yi, Wukong, Rakan, Sett,
+      Shen, Syndra, Varus, Xayah, Xin Zhao,
+      Yasuo, Yone, Zed
+    ];
+
+    let state = {};
+    const saved = localStorage.getItem('ioniaTracker');
+    if (saved) {
+      state = JSON.parse(saved);
+    } else {
+      champions.forEach(name = {
+        state[name] = { w 0, l 0 };
+      });
+    }
+
+    const grid = document.getElementById('championGrid');
+
+    champions.forEach(name = {
+      const div = document.createElement('div');
+      div.className = 'champion';
+      div.innerHTML = `
+        img src=httpsddragon.leagueoflegends.comcdn13.24.1imgchampion${name.replace(' ', '')}.png onerror=this.src='httpsvia.placeholder.com50'
+        div class=champion-name${name}div
+        div class=score id=score-${name}W  Lbr${state[name].w}  ${state[name].l}div
+        div
+          span class=win onclick=updateScore('${name}', 'w')+Wspan
+          span class=loss onclick=updateScore('${name}', 'l')+Lspan
+        div
+      `;
+      grid.appendChild(div);
+    });
+
+    function updateScore(champ, type) {
+      state[champ][type]++;
+      document.getElementById(`score-${champ}`).innerHTML = `W  Lbr${state[champ].w}  ${state[champ].l}`;
+      saveState();
+      updateRank();
+    }
+
+    function saveState() {
+      localStorage.setItem('ioniaTracker', JSON.stringify(state));
+    }
+
+    function updateRank() {
+      const totalGames = Object.values(state).reduce((sum, s) = sum + s.w + s.l, 0);
+      const totalWins = Object.values(state).reduce((sum, s) = sum + s.w, 0);
+      document.getElementById('rankDisplay').innerHTML = `Gold II – ${totalWins  10} LPbr${totalGames} Games`;
+    }
+
+    updateRank();
+  script
+body
+html
