@@ -70,7 +70,7 @@
   <div class="selector">
     <label>
       Spieler wählen:
-      <select id="playerSelect" onchange="changePlayer()">
+      <select id="playerSelect">
         <option value="Krischan">Krischan</option>
         <option value="Anna">Anna</option>
       </select>
@@ -80,81 +80,84 @@
   <div class="grid" id="championGrid"></div>
 
   <script>
-    const champions = [
-      "Ahri", "Akali", "Hwei", "Irelia", "Ivern",
-      "Jhin", "Karma", "Kayn", "Kennen", "LeeSin",
-      "Lillia", "MasterYi", "Wukong", "Rakan", "Sett",
-      "Shen", "Syndra", "Varus", "Xayah", "XinZhao",
-      "Yasuo", "Yone", "Zed"
-    ];
+    window.addEventListener('DOMContentLoaded', () => {
+      const champions = [
+        "Ahri", "Akali", "Hwei", "Irelia", "Ivern",
+        "Jhin", "Karma", "Kayn", "Kennen", "LeeSin",
+        "Lillia", "MasterYi", "Wukong", "Rakan", "Sett",
+        "Shen", "Syndra", "Varus", "Xayah", "XinZhao",
+        "Yasuo", "Yone", "Zed"
+      ];
 
-    let currentPlayer = localStorage.getItem('ioniaActivePlayer') || 'Krischan';
-    document.getElementById('playerSelect').value = currentPlayer;
+      let currentPlayer = localStorage.getItem('ioniaActivePlayer') || 'Krischan';
+      document.getElementById('playerSelect').value = currentPlayer;
 
-    let state = {};
-    const saved = localStorage.getItem('ioniaTracker_' + currentPlayer);
-    if (saved) {
-      state = JSON.parse(saved);
-    } else {
-      champions.forEach(name => {
-        state[name] = { w: 0, l: 0 };
-      });
-    }
-
-    const grid = document.getElementById('championGrid');
-
-    function renderGrid() {
-      grid.innerHTML = '';
-      champions.forEach(name => {
-        const div = document.createElement('div');
-        div.className = 'champion';
-        div.innerHTML = `
-          <img src="https://ddragon.leagueoflegends.com/cdn/14.8.1/img/champion/${name}.png" onerror="this.src='https://via.placeholder.com/50'">
-          <div class="champion-name">${name}</div>
-          <div class="score" id="score-${name}">W / L<br>${state[name].w} / ${state[name].l}</div>
-          <div>
-            <span class="win" onclick="updateScore('${name}', 'w')">+W</span>
-            <span class="loss" onclick="updateScore('${name}', 'l')">+L</span>
-          </div>
-        `;
-        grid.appendChild(div);
-      });
-      updateRank();
-    }
-
-    function updateScore(champ, type) {
-      state[champ][type]++;
-      document.getElementById(`score-${champ}`).innerHTML = `W / L<br>${state[champ].w} / ${state[champ].l}`;
-      saveState();
-      updateRank();
-    }
-
-    function saveState() {
-      localStorage.setItem('ioniaTracker_' + currentPlayer, JSON.stringify(state));
-    }
-
-    function updateRank() {
-      const totalGames = Object.values(state).reduce((sum, s) => sum + s.w + s.l, 0);
-      const totalWins = Object.values(state).reduce((sum, s) => sum + s.w, 0);
-      document.getElementById('rankDisplay').innerHTML = `Gold II – ${totalWins * 10} LP<br>${totalGames} Games`;
-    }
-
-    function changePlayer() {
-      currentPlayer = document.getElementById('playerSelect').value;
-      localStorage.setItem('ioniaActivePlayer', currentPlayer);
-      const newSave = localStorage.getItem('ioniaTracker_' + currentPlayer);
-      if (newSave) {
-        state = JSON.parse(newSave);
+      let state = {};
+      const saved = localStorage.getItem('ioniaTracker_' + currentPlayer);
+      if (saved) {
+        state = JSON.parse(saved);
       } else {
-        state = {};
         champions.forEach(name => {
           state[name] = { w: 0, l: 0 };
         });
       }
-      renderGrid();
-    }
 
-    renderGrid();
+      const grid = document.getElementById('championGrid');
+
+      function renderGrid() {
+        grid.innerHTML = '';
+        champions.forEach(name => {
+          const div = document.createElement('div');
+          div.className = 'champion';
+          div.innerHTML = `
+            <img src="https://ddragon.leagueoflegends.com/cdn/14.8.1/img/champion/${name}.png" onerror="this.src='https://via.placeholder.com/50'">
+            <div class="champion-name">${name}</div>
+            <div class="score" id="score-${name}">W / L<br>${state[name].w} / ${state[name].l}</div>
+            <div>
+              <span class="win" onclick="updateScore('${name}', 'w')">+W</span>
+              <span class="loss" onclick="updateScore('${name}', 'l')">+L</span>
+            </div>
+          `;
+          grid.appendChild(div);
+        });
+        updateRank();
+      }
+
+      function updateScore(champ, type) {
+        state[champ][type]++;
+        document.getElementById(`score-${champ}`).innerHTML = `W / L<br>${state[champ].w} / ${state[champ].l}`;
+        saveState();
+        updateRank();
+      }
+
+      function saveState() {
+        localStorage.setItem('ioniaTracker_' + currentPlayer, JSON.stringify(state));
+      }
+
+      function updateRank() {
+        const totalGames = Object.values(state).reduce((sum, s) => sum + s.w + s.l, 0);
+        const totalWins = Object.values(state).reduce((sum, s) => sum + s.w, 0);
+        document.getElementById('rankDisplay').innerHTML = `Gold II – ${totalWins * 10} LP<br>${totalGames} Games`;
+      }
+
+      function changePlayer() {
+        currentPlayer = document.getElementById('playerSelect').value;
+        localStorage.setItem('ioniaActivePlayer', currentPlayer);
+        const newSave = localStorage.getItem('ioniaTracker_' + currentPlayer);
+        if (newSave) {
+          state = JSON.parse(newSave);
+        } else {
+          state = {};
+          champions.forEach(name => {
+            state[name] = { w: 0, l: 0 };
+          });
+        }
+        renderGrid();
+      }
+
+      document.getElementById('playerSelect').addEventListener('change', changePlayer);
+      renderGrid();
+    });
   </script>
 </body>
 </html>
