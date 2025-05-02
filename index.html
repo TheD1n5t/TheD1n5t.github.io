@@ -114,13 +114,14 @@
             <div class="champion-name">${name}</div>
             <div class="score" id="score-${name}">W / L<br>${state[name].w} / ${state[name].l}</div>
             <div>
-              <span class="win" onclick="updateScore('${name}', 'w')">+W</span>
-              <span class="loss" onclick="updateScore('${name}', 'l')">+L</span>
+              <button class="win" data-champ="${name}" data-type="w">+W</button>
+              <button class="loss" data-champ="${name}" data-type="l">+L</button>
             </div>
           `;
           grid.appendChild(div);
         });
         updateRank();
+        bindEvents();
       }
 
       function updateScore(champ, type) {
@@ -128,6 +129,16 @@
         document.getElementById(`score-${champ}`).innerHTML = `W / L<br>${state[champ].w} / ${state[champ].l}`;
         saveState();
         updateRank();
+      }
+
+      function bindEvents() {
+        document.querySelectorAll('button.win, button.loss').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const champ = btn.getAttribute('data-champ');
+            const type = btn.getAttribute('data-type');
+            updateScore(champ, type);
+          });
+        });
       }
 
       function saveState() {
