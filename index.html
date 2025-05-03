@@ -64,6 +64,8 @@
       font-size: 1em;
     }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
 </head>
 <body>
   <h1>IONIA CHALLENGE</h1>
@@ -80,6 +82,19 @@
   <div class="grid" id="championGrid"></div>
 
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBw9yDGTBJmqgPNX4EVgGr3ftM1SbBCg1Q",
+      authDomain: "ionia-challenge.firebaseapp.com",
+      projectId: "ionia-challenge",
+      storageBucket: "ionia-challenge.firebasestorage.app",
+      messagingSenderId: "967807527667",
+      appId: "1:967807527667:web:46c519e2644fbf18faa586",
+      databaseURL: "https://ionia-challenge-default-rtdb.europe-west1.firebasedatabase.app"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     window.addEventListener('DOMContentLoaded', () => {
       const champions = [
         "Ahri", "Akali", "Hwei", "Irelia", "Ivern",
@@ -93,14 +108,6 @@
       document.getElementById('playerSelect').value = currentPlayer;
 
       let state = {};
-      const saved = localStorage.getItem('ioniaTracker_' + currentPlayer);
-      if (saved) {
-        state = JSON.parse(saved);
-      } else {
-        champions.forEach(name => {
-          state[name] = { w: 0, l: 0 };
-        });
-      }
 
       const grid = document.getElementById('championGrid');
 
@@ -126,9 +133,7 @@
 
       function updateScore(champ, type) {
         state[champ][type]++;
-        document.getElementById(`score-${champ}`).innerHTML = `W / L<br>${state[champ].w} / ${state[champ].l}`;
-        saveState();
-        updateRank();
+        db.ref(currentPlayer).set(state);
       }
 
       function bindEvents() {
@@ -141,10 +146,6 @@
         });
       }
 
-      function saveState() {
-        localStorage.setItem('ioniaTracker_' + currentPlayer, JSON.stringify(state));
-      }
-
       function updateRank() {
         const totalGames = Object.values(state).reduce((sum, s) => sum + s.w + s.l, 0);
         const totalWins = Object.values(state).reduce((sum, s) => sum + s.w, 0);
@@ -154,20 +155,22 @@
       function changePlayer() {
         currentPlayer = document.getElementById('playerSelect').value;
         localStorage.setItem('ioniaActivePlayer', currentPlayer);
-        const newSave = localStorage.getItem('ioniaTracker_' + currentPlayer);
-        if (newSave) {
-          state = JSON.parse(newSave);
-        } else {
-          state = {};
-          champions.forEach(name => {
-            state[name] = { w: 0, l: 0 };
-          });
-        }
-        renderGrid();
+        listenToChanges();
+      }
+
+      function listenToChanges() {
+        db.ref(currentPlayer).off(); // alte Listener entfernen
+        db.ref(currentPlayer).on('value', snapshot => {
+          const data = snapshot.val();
+          if (data) {
+            state = data;
+            renderGrid();
+          }
+        });
       }
 
       document.getElementById('playerSelect').addEventListener('change', changePlayer);
-      renderGrid();
+      listenToChanges();
     });
   </script>
 </body>
