@@ -1,8 +1,7 @@
-<style>
 body {
   font-family: 'Noto Sans', sans-serif;
-  background-color: #f7f7f9;
-  color: #333;
+  background-color: #1c1c1f;
+  color: #e4e4e7;
   margin: 0;
   padding: 0;
 }
@@ -16,6 +15,26 @@ body {
 input, button {
   padding: 8px;
   font-size: 16px;
+  border-radius: 4px;
+  border: none;
+}
+
+input {
+  background-color: #2b2b2f;
+  color: white;
+  border: 1px solid #3c3c44;
+}
+
+button {
+  background-color: #5383e8;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #3f6ad8;
 }
 
 #match-history {
@@ -23,19 +42,24 @@ input, button {
 }
 
 .match-block {
-  background: white;
-  border: 1px solid #ddd;
+  background: #2b2b2f;
+  border: 1px solid #3c3c44;
   border-radius: 6px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.match-block:hover {
+  transform: scale(1.01);
 }
 
 .match-header {
   padding: 6px 10px;
-  background: #f0f2f5;
+  background: #1e1e23;
   font-size: 14px;
-  color: #666;
+  color: #bbb;
 }
 
 .match-main {
@@ -57,6 +81,7 @@ input, button {
   height: 28px;
   border-radius: 4px;
   margin: 0 4px;
+  box-shadow: 0 0 2px rgba(255,255,255,0.1);
 }
 
 .kda {
@@ -74,10 +99,6 @@ input, button {
   background-color: #5383e8;
 }
 
-.result:contains("Niederlage") {
-  background-color: #e84057;
-}
-
 .items {
   display: flex;
   flex-wrap: wrap;
@@ -89,7 +110,12 @@ input, button {
   width: 32px;
   height: 32px;
   border-radius: 4px;
-  background-color: #eee;
+  background-color: #444;
+  transition: transform 0.2s ease;
+}
+
+.item:hover {
+  transform: scale(1.1);
 }
 
 .teams {
@@ -101,7 +127,7 @@ input, button {
 
 .team {
   flex: 1;
-  background: #f9f9fb;
+  background: #1e1e23;
   padding: 10px;
   border-radius: 4px;
 }
@@ -121,17 +147,18 @@ input, button {
 
 .player-name {
   font-size: 13px;
-  color: #1e1e1e;
+  color: #ddd;
   text-decoration: none;
 }
 
 .player-name:hover {
   text-decoration: underline;
+  color: #fff;
 }
 
 .team-analysis-wrapper {
-  background: #fff;
-  border-top: 1px solid #eee;
+  background: #2b2b2f;
+  border-top: 1px solid #3c3c44;
   padding: 10px;
 }
 
@@ -139,6 +166,7 @@ input, button {
   width: 100%;
   font-size: 13px;
   border-collapse: collapse;
+  color: #ccc;
 }
 
 .team-analysis th, .team-analysis td {
@@ -154,5 +182,23 @@ input, button {
   color: #5383e8;
   padding: 4px 0;
   display: inline-block;
+  transition: color 0.2s ease;
 }
-</style>
+
+.toggle-analysis:hover {
+  color: #7aa0f9;
+}
+
+/* Optional: special badge style for future kill streaks etc. */
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  background-color: #c43c3c;
+  border-radius: 3px;
+  margin-left: 4px;
+  text-transform: uppercase;
+  box-shadow: 0 0 3px rgba(0,0,0,0.5);
+}
