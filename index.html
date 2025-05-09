@@ -98,10 +98,10 @@
         }
 
         console.log("parsed summoner:", summData);
-        if (!summData.name) throw new Error("Summoner-Daten ungültig.");
+        if (!summData.profileIconId || !summData.summonerLevel) throw new Error("Summoner-Daten unvollständig.");
 
         infoDiv.innerHTML = `
-          <p><strong>Name:</strong> ${summData.name}</p>
+          <p><strong>Name:</strong> ${riotData.gameName}</p>
           <p><strong>Level:</strong> ${summData.summonerLevel}</p>
           <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/profileicon/${summData.profileIconId}.png" 
               alt="Profile Icon" width="64" height="64" />
