@@ -52,7 +52,7 @@
     const rankedData = await rankedRes.json();
     const soloQ = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
     const tier = soloQ ? `${soloQ.tier} ${soloQ.rank} – ${soloQ.leaguePoints} LP` : "Unranked";
-    infoDiv.innerHTML = `<p><strong>${summData.name}</strong> (Level ${summData.summonerLevel})<br>Rang: ${tier}</p>`;
+    infoDiv.innerHTML = `<p><strong>${riotData.gameName}#${riotData.tagLine}</strong> (Level ${summData.summonerLevel})<br>Rang: ${tier}</p>`;
     if (!summData.id || !summData.summonerLevel) throw new Error("Summoner-Daten unvollständig.");
 
     // Match-History (letzte 5 Spiele)
