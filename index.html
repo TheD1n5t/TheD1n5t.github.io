@@ -70,13 +70,13 @@
           }
         }
         // Debugging-Ausgabe für Items
-        if (items.length === 0) {
+        if (itemIds.length === 0) {
           console.log("Keine Items verfügbar für Spieler", player.championName);
         }
 
         // Dynamisch Item-Bilder rendern, falls vorhanden
-        const itemElements = items.length > 0 
-          ? items.map(itemId => 
+        const itemElements = itemIds.length > 0 
+          ? itemIds.map(itemId => 
               `<img src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/item/${itemId}.png" />`).join('')
           : "<p>Keine Items verfügbar.</p>";
 
