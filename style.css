@@ -220,6 +220,21 @@ li.match-card {
   border-radius: 3px;
 }
 
+.team-analysis {
+  margin-top: 10px;
+}
+
+.team-analysis table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.team-analysis th, .team-analysis td {
+  border-bottom: 1px solid #ccc;
+  padding: 4px 6px;
+  text-align: left;
+}
 
 
 
