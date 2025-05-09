@@ -149,27 +149,47 @@ async function loadByRiotId() {
       const visionBlue = teamBlue.reduce((a, b) => a + b.visionScore, 0);
       const visionRed = teamRed.reduce((a, b) => a + b.visionScore, 0);
 
-      const teamAnalysisHTML = `
-        <div class="team-analysis-wrapper">
-          <button class="toggle-analysis">Team-Analyse anzeigen ▼</button>
-          <div class="team-analysis" style="display:none">
-            <table>
-              <tr><th>Stat</th><th style="color:#38f;">Blau</th><th style="color:#f44;">Rot</th></tr>
-              <tr><td>Kills</td><td>${killsBlue}</td><td>${killsRed}</td></tr>
-              <tr><td>Gold</td><td>${goldBlue}</td><td>${goldRed}</td></tr>
-              <tr><td>Schaden</td><td>${dmgBlue}</td><td>${dmgRed}</td></tr>
-              <tr><td>Erlittener Schaden</td><td>${takenBlue}</td><td>${takenRed}</td></tr>
-              <tr><td>CS</td><td>${csBlue}</td><td>${csRed}</td></tr>
-              <tr><td>Wards</td><td>${visionBlue}</td><td>${visionRed}</td></tr>
-            </table>
-          </div>
+      <div class="team-analysis-wrapper">
+        <button class="toggle-analysis">Team-Analyse anzeigen ▼</button>
+        <div class="team-analysis" style="display:none">
+          <div class="graph-group" data-label="Champion-Kills" data-blue='[12,20,6,4,8]' data-red='[6,11,2,9,2]'></div>
+          <div class="graph-group" data-label="Schaden" data-blue='[41245,13822,38695,17587,27828]' data-red='[16603,28082,18143,13325,15012]'></div>
+          <div class="graph-group" data-label="Gold" data-blue='[15345,13664,18671,9990,12348]' data-red='[10951,13108,11979,13602,7817]'></div>
+          <div class="graph-group" data-label="Erlittener Schaden" data-blue='[27018,37651,27550,23056,23869]' data-red='[38743,46892,35223,29733,19560]'></div>
+          <div class="graph-group" data-label="CS" data-blue='[185,196,240,111,27]' data-red='[169,185,223,205,41]'></div>
+          <div class="graph-group" data-label="Wards" data-blue='[16,2,2,13,35]' data-red='[9,5,2,8,16]'></div>
         </div>
-      `;
+      </div>
+
 
       matchHistoryHTML += `<div class="match-block">${matchMainHTML}${teamAnalysisHTML}</div>`;
     }
 
     matchHistoryDiv.innerHTML = matchHistoryHTML;
+    document.querySelectorAll('.graph-group').forEach(group => {
+      const label = group.getAttribute('data-label');
+      const blue = JSON.parse(group.getAttribute('data-blue'));
+      const red = JSON.parse(group.getAttribute('data-red'));
+      const max = Math.max(...blue, ...red);
+    
+      const createBar = (val, max, team) => {
+        const percent = Math.round((val / max) * 100);
+        return `
+          <div class="bar-row">
+            <div class="bar-container">
+              <div class="bar-fill bar-${team}" style="width: ${percent}%;">${val}</div>
+            </div>
+          </div>`;
+      };
+    
+      let html = `<h4>${label}</h4><div class="stat-columns"><div class="stat-blue">`;
+      blue.forEach(v => html += createBar(v, max, "blue"));
+      html += `</div><div class="stat-red">`;
+      red.forEach(v => html += createBar(v, max, "red"));
+      html += `</div></div>`;
+      group.innerHTML = html;
+    });
+
     document.querySelectorAll('.toggle-analysis').forEach(btn => {
       btn.addEventListener('click', () => {
         const panel = btn.nextElementSibling;
