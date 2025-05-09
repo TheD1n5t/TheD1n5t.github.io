@@ -44,44 +44,44 @@ async function loadByRiotId() {
     const runesData = await fetch("https://ddragon.leagueoflegends.com/cdn/15.9.1/data/en_US/runesReforged.json").then(r => r.json());
     const spellData = await fetch("https://ddragon.leagueoflegends.com/cdn/15.9.1/data/en_US/summoner.json").then(r => r.json());
 
-    const riotRes = await fetch(`${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`);
+    const riotRes = await fetch(${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)});
     const riotData = await riotRes.json();
     if (!riotData.puuid) throw new Error("Riot ID nicht gefunden.");
 
-    const summRes = await fetch(`${proxyUrl}/summoner/by-puuid/${riotData.puuid}`);
+    const summRes = await fetch(${proxyUrl}/summoner/by-puuid/${riotData.puuid});
     const summData = await summRes.json();
-    const rankedRes = await fetch(`${proxyUrl}/ranked/by-summoner/${summData.id}`);
+    const rankedRes = await fetch(${proxyUrl}/ranked/by-summoner/${summData.id});
     const rankedData = await rankedRes.json();
     const soloQ = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
-    const tier = soloQ ? `${soloQ.tier} ${soloQ.rank} – ${soloQ.leaguePoints} LP` : "Unranked";
+    const tier = soloQ ? ${soloQ.tier} ${soloQ.rank} – ${soloQ.leaguePoints} LP : "Unranked";
 
     const validTiers = ["iron", "bronze", "silver", "gold", "platinum", "emerald", "diamond", "master", "grandmaster", "challenger"];
     const tierLower = soloQ?.tier?.toLowerCase();
     const tierIcon = validTiers.includes(tierLower)
-      ? `<img src="https://opgg-static.akamaized.net/images/medals/${tierLower}.png" alt="${soloQ.tier}" class="tier-icon">`
+      ? <img src="https://opgg-static.akamaized.net/images/medals/${tierLower}.png" alt="${soloQ.tier}" class="tier-icon">
       : '';
 
-    infoDiv.innerHTML = `<p><strong>${riotData.gameName}#${riotData.tagLine}</strong> (Level ${summData.summonerLevel})<br>Rang: ${tier} ${tierIcon}</p>`;
+    infoDiv.innerHTML = <p><strong>${riotData.gameName}#${riotData.tagLine}</strong> (Level ${summData.summonerLevel})<br>Rang: ${tier} ${tierIcon}</p>;
 
-    const matchIdsRes = await fetch(`${proxyUrl}/matches/by-puuid/${riotData.puuid}?count=5`);
+    const matchIdsRes = await fetch(${proxyUrl}/matches/by-puuid/${riotData.puuid}?count=5);
     const matchIds = await matchIdsRes.json();
 
     let matchHistoryHTML = "<h2>Letzte Spiele:</h2>";
 
     for (const matchId of matchIds) {
-      const matchRes = await fetch(`${proxyUrl}/match/${matchId}`);
+      const matchRes = await fetch(${proxyUrl}/match/${matchId});
       const matchData = await matchRes.json();
       const allPlayers = matchData.info.participants;
       const player = allPlayers.find(p => p.puuid === riotData.puuid);
       const teamBlue = allPlayers.filter(p => p.teamId === 100);
       const teamRed = allPlayers.filter(p => p.teamId === 200);
 
-      const championIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${player.championName}.png`;
+      const championIcon = https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${player.championName}.png;
       const summ1 = Object.values(spellData.data).find(spell => parseInt(spell.key) === player.summoner1Id)?.image.full;
       const summ2 = Object.values(spellData.data).find(spell => parseInt(spell.key) === player.summoner2Id)?.image.full;
 
-      const itemHTML = Array.from({ length: 7 }, (_, i) => player[`item${i}`] > 0
-        ? `<img src='https://ddragon.leagueoflegends.com/cdn/15.9.1/img/item/${player[`item${i}`]}.png' class='item'>`
+      const itemHTML = Array.from({ length: 7 }, (_, i) => player[item${i}] > 0
+        ? <img src='https://ddragon.leagueoflegends.com/cdn/15.9.1/img/item/${player[item${i}]}.png' class='item'>
         : '').join('');
 
       const primaryRune = player.perks.styles[0]?.selections[0]?.perk;
@@ -104,19 +104,19 @@ async function loadByRiotId() {
 
       function renderTeam(players) {
         return players.map(p => {
-          const champIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${p.championName}.png`;
+          const champIcon = https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${p.championName}.png;
           const name = p.riotIdGameName || p.summonerName || 'Unbekannt';
           const nameEncoded = encodeURIComponent(name);
-          return `<div class='player'>
+          return <div class='player'>
             <img src='${champIcon}' title='${name}' class='mini-champ'>
             <a class='player-name' href='https://www.op.gg/summoners/euw/${nameEncoded}' target='_blank'>${name}</a>
-          </div>`;
+          </div>;
         }).join('');
       }
 
       const durationMin = Math.floor(matchData.info.gameDuration / 60);
 
-      const matchMainHTML = `
+      const matchMainHTML = 
         <div class="match-main">
           <div class="match-header">
             <span>${matchData.info.queueId === 420 ? 'Ranked' : 'Normal'} – ${durationMin} Min</span>
@@ -124,8 +124,8 @@ async function loadByRiotId() {
           <img class="champ-icon" src="${championIcon}" alt="${player.championName}" />
           <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${summ1}" />
           <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${summ2}" />
-          ${rune1 ? `<img class="rune" src="https://ddragon.leagueoflegends.com/cdn/img/${rune1}" />` : ''}
-          ${rune2 ? `<img class="rune" src="https://ddragon.leagueoflegends.com/cdn/img/${rune2}" />` : ''}
+          ${rune1 ? <img class="rune" src="https://ddragon.leagueoflegends.com/cdn/img/${rune1}" /> : ''}
+          ${rune2 ? <img class="rune" src="https://ddragon.leagueoflegends.com/cdn/img/${rune2}" /> : ''}
           <div class="kda">${player.kills} / ${player.deaths} / ${player.assists}</div>
           <div class="result">${player.win ? 'Sieg' : 'Niederlage'}</div>
           <div class="items">${itemHTML}</div>
@@ -134,7 +134,7 @@ async function loadByRiotId() {
             <div class="team red">${renderTeam(teamRed)}</div>
           </div>
         </div>
-      `;
+      ;
 
       const killsBlue = teamBlue.reduce((a, b) => a + b.kills, 0);
       const killsRed = teamRed.reduce((a, b) => a + b.kills, 0);
@@ -149,47 +149,27 @@ async function loadByRiotId() {
       const visionBlue = teamBlue.reduce((a, b) => a + b.visionScore, 0);
       const visionRed = teamRed.reduce((a, b) => a + b.visionScore, 0);
 
-      <div class="team-analysis-wrapper">
-        <button class="toggle-analysis">Team-Analyse anzeigen ▼</button>
-        <div class="team-analysis" style="display:none">
-          <div class="graph-group" data-label="Champion-Kills" data-blue='[12,20,6,4,8]' data-red='[6,11,2,9,2]'></div>
-          <div class="graph-group" data-label="Schaden" data-blue='[41245,13822,38695,17587,27828]' data-red='[16603,28082,18143,13325,15012]'></div>
-          <div class="graph-group" data-label="Gold" data-blue='[15345,13664,18671,9990,12348]' data-red='[10951,13108,11979,13602,7817]'></div>
-          <div class="graph-group" data-label="Erlittener Schaden" data-blue='[27018,37651,27550,23056,23869]' data-red='[38743,46892,35223,29733,19560]'></div>
-          <div class="graph-group" data-label="CS" data-blue='[185,196,240,111,27]' data-red='[169,185,223,205,41]'></div>
-          <div class="graph-group" data-label="Wards" data-blue='[16,2,2,13,35]' data-red='[9,5,2,8,16]'></div>
+      const teamAnalysisHTML = 
+        <div class="team-analysis-wrapper">
+          <button class="toggle-analysis">Team-Analyse anzeigen ▼</button>
+          <div class="team-analysis" style="display:none">
+            <table>
+              <tr><th>Stat</th><th style="color:#38f;">Blau</th><th style="color:#f44;">Rot</th></tr>
+              <tr><td>Kills</td><td>${killsBlue}</td><td>${killsRed}</td></tr>
+              <tr><td>Gold</td><td>${goldBlue}</td><td>${goldRed}</td></tr>
+              <tr><td>Schaden</td><td>${dmgBlue}</td><td>${dmgRed}</td></tr>
+              <tr><td>Erlittener Schaden</td><td>${takenBlue}</td><td>${takenRed}</td></tr>
+              <tr><td>CS</td><td>${csBlue}</td><td>${csRed}</td></tr>
+              <tr><td>Wards</td><td>${visionBlue}</td><td>${visionRed}</td></tr>
+            </table>
+          </div>
         </div>
-      </div>
+      ;
 
-
-      matchHistoryHTML += `<div class="match-block">${matchMainHTML}${teamAnalysisHTML}</div>`;
+      matchHistoryHTML += <div class="match-block">${matchMainHTML}${teamAnalysisHTML}</div>;
     }
 
     matchHistoryDiv.innerHTML = matchHistoryHTML;
-    document.querySelectorAll('.graph-group').forEach(group => {
-      const label = group.getAttribute('data-label');
-      const blue = JSON.parse(group.getAttribute('data-blue'));
-      const red = JSON.parse(group.getAttribute('data-red'));
-      const max = Math.max(...blue, ...red);
-    
-      const createBar = (val, max, team) => {
-        const percent = Math.round((val / max) * 100);
-        return `
-          <div class="bar-row">
-            <div class="bar-container">
-              <div class="bar-fill bar-${team}" style="width: ${percent}%;">${val}</div>
-            </div>
-          </div>`;
-      };
-    
-      let html = `<h4>${label}</h4><div class="stat-columns"><div class="stat-blue">`;
-      blue.forEach(v => html += createBar(v, max, "blue"));
-      html += `</div><div class="stat-red">`;
-      red.forEach(v => html += createBar(v, max, "red"));
-      html += `</div></div>`;
-      group.innerHTML = html;
-    });
-
     document.querySelectorAll('.toggle-analysis').forEach(btn => {
       btn.addEventListener('click', () => {
         const panel = btn.nextElementSibling;
@@ -199,7 +179,7 @@ async function loadByRiotId() {
       });
     });
   } catch (err) {
-    infoDiv.innerHTML = `<p style="color:red;">Fehler beim Laden der Daten: ${err.message}</p>`;
+    infoDiv.innerHTML = <p style="color:red;">Fehler beim Laden der Daten: ${err.message}</p>;
     console.error("Fehler beim Laden:", err);
   }
 }
