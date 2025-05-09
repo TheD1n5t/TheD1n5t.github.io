@@ -53,7 +53,6 @@
     const soloQ = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
     const tier = soloQ ? `${soloQ.tier} ${soloQ.rank} – ${soloQ.leaguePoints} LP` : "Unranked";
     const tierUpper = soloQ ? soloQ.tier.toUpperCase() : null;
-    const tierUpper = soloQ ? soloQ.tier.toUpperCase() : null;
     const rankIcon = tierUpper ? `<img src="https://opgg-static.akamaized.net/images/medals/${tierUpper}.png" alt="${tierUpper}" style="height: 40px; vertical-align: middle;" />` : '';
     
     infoDiv.innerHTML = `
@@ -61,7 +60,6 @@
         <strong>${riotData.gameName}#${riotData.tagLine}</strong> (Level ${summData.summonerLevel})<br>
         Rang: ${tier} ${rankIcon}
       </p>`;
-
 
     if (!summData.id || !summData.summonerLevel) throw new Error("Summoner-Daten unvollständig.");
 
