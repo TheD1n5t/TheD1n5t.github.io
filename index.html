@@ -61,12 +61,14 @@
         const result = player.win ? "<span style='color:lightgreen;'>Sieg</span>" : "<span style='color:orangered;'>Niederlage</span>";
         const championIcon = `https://ddragon.leagueoflegends.com/cdn/13.24.1/img/champion/${player.championName}.png`;
 
-        // Sicherstellen, dass player.items definiert ist, ansonsten mit leeren Array arbeiten
-        const items = Array.isArray(player.items) ? player.items : [];
+        // Sicherstellen, dass player.items definiert ist und nicht leer ist
+        const items = Array.isArray(player.items) && player.items.length > 0 ? player.items : [];
 
-        // Dynamisch Item-Bilder rendern
-        const itemElements = items.map(itemId => 
-          `<img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/${itemId}.png" />`).join('');
+        // Dynamisch Item-Bilder rendern, falls vorhanden
+        const itemElements = items.length > 0 
+          ? items.map(itemId => 
+              `<img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/${itemId}.png" />`).join('')
+          : "<p>Keine Items verfügbar.</p>";
 
         matchHistoryHTML += `
           <div class="match-card ${player.win ? 'win' : 'loss'}">
@@ -93,7 +95,7 @@
             </div>
 
             <div class="items">
-              ${itemElements || "<p>Keine Items verfügbar.</p>"}
+              ${itemElements}
             </div>
           </div>
         `;
@@ -106,6 +108,7 @@
     console.error("Fehler beim Laden:", err);
   }
 }
+
 
   </script>
 </body>
