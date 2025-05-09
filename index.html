@@ -1,4 +1,26 @@
-// ... (gleicher HTML-Kopf wie bisher)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mächtiger Donut - LoL Stats</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>LoL Stats per Riot ID</h1>
+    <input type="text" id="riotIdInput" placeholder="z. B. Mächtiger Donut#EUW" />
+    <button id="loadButton">Riot ID laden</button>
+
+    <div id="summoner-info">
+      <p>Bitte Riot ID eingeben.</p>
+    </div>
+
+    <div id="match-history">
+      <!-- Dynamische Match History wird hier geladen -->
+    </div>
+  </div>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
