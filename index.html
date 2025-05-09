@@ -85,6 +85,25 @@
           const visionBlue = summarizeStat(teamBlue, "visionScore");
           const visionRed = summarizeStat(teamRed, "visionScore");
 
+          const championIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${player.championName}.png`;
+          const summ1 = Object.values(spellData.data).find(spell => parseInt(spell.key) === player.summoner1Id)?.image.full;
+          const summ2 = Object.values(spellData.data).find(spell => parseInt(spell.key) === player.summoner2Id)?.image.full;
+
+          const itemHTML = Array.from({ length: 7 }, (_, i) => player[`item${i}`] > 0
+            ? `<img src='https://ddragon.leagueoflegends.com/cdn/15.9.1/img/item/${player[`item${i}`]}.png' class='item'>`
+            : '').join('');
+
+          const matchMainHTML = `
+            <div class="match-main">
+              <img class="champ-icon" src="${championIcon}" alt="${player.championName}" />
+              <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${summ1}" />
+              <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${summ2}" />
+              <div class="kda">${player.kills} / ${player.deaths} / ${player.assists}</div>
+              <div class="result">${player.win ? 'Sieg' : 'Niederlage'}</div>
+              <div class="items">${itemHTML}</div>
+            </div>
+          `;
+
           const teamAnalysisHTML = `
             <div class="team-analysis-wrapper">
               <button class="toggle-analysis">Team-Analyse anzeigen ▼</button>
@@ -100,15 +119,6 @@
                   <tr><td>Wardscore</td><td>${visionBlue}</td><td>${visionRed}</td></tr>
                 </table>
               </div>
-            </div>
-          `;
-
-          const championIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${player.championName}.png`;
-          const matchMainHTML = `
-            <div class="match-main">
-              <img class="champ-icon" src="${championIcon}" alt="${player.championName}" />
-              <div class="kda">${player.kills} / ${player.deaths} / ${player.assists}</div>
-              <div class="result">${player.win ? 'Sieg' : 'Niederlage'}</div>
             </div>
           `;
 
