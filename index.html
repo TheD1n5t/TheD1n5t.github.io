@@ -58,6 +58,14 @@
       const player = matchData.info.participants.find(p => p.puuid === riotData.puuid);
 
       if (player) {
+        // Runes
+        const primaryRuneStyle = player.perks.styles[0]?.style;
+        const primaryRune = player.perks.styles[0]?.selections[0]?.perk;
+        const secondaryRuneStyle = player.perks.styles[1]?.style;
+        
+        const runeImg = (id) =>
+          id ? `<img class="rune" src="https://ddragon.canisback.com/img/${id}.png" />` : '';
+
         const result = player.win ? "<span style='color:lightgreen;'>Sieg</span>" : "<span style='color:orangered;'>Niederlage</span>";
         const championIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${player.championName}.png`;
 
@@ -91,11 +99,12 @@
             <div class="champion-block">
               <div class="champion">
                 <img class="champ-icon" src="${championIcon}" alt="${player.championName}" />
-                <div class="level">${player.championLevel}</div>
+                <div class="level">${player.champLevel}</div>
               </div>
               <div class="spells-runes">
                 <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${player.summoner1Id}.png" />
                 <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${player.summoner2Id}.png" />
+                ${runeImg(primaryRune)}${runeImg(secondaryRuneStyle)}
               </div>
             </div>
 
