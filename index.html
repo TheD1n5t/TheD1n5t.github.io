@@ -73,18 +73,31 @@
       try {
         const proxyUrl = "https://lol-api-proxy.onrender.com";
 
+        console.log("Frage PUUID für:", gameName, "#", tagLine);
         const riotRes = await fetch(`${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`);
         const riotText = await riotRes.text();
+        console.log("riotText:", riotText);
         if (!riotRes.ok) throw new Error(riotText);
 
         const riotData = JSON.parse(riotText);
+        console.log("riotData:", riotData);
         if (!riotData.puuid) throw new Error("Riot ID nicht gefunden.");
 
+        console.log("Lade Summoner-Daten für PUUID:", riotData.puuid);
         const summRes = await fetch(`${proxyUrl}/summoner/by-puuid/${riotData.puuid}`);
         const summText = await summRes.text();
+        console.log("summoner raw response:", summText);
         if (!summRes.ok) throw new Error(summText);
 
-        const summData = JSON.parse(summText);
+        let summData;
+        try {
+          summData = JSON.parse(summText);
+        } catch (parseErr) {
+          console.error("Fehler beim Parsen von summoner JSON:", parseErr);
+          throw new Error("Antwort konnte nicht gelesen werden. (Ungültiges Format)");
+        }
+
+        console.log("parsed summoner:", summData);
         if (!summData.name) throw new Error("Summoner-Daten ungültig.");
 
         infoDiv.innerHTML = `
@@ -95,7 +108,7 @@
         `;
       } catch (err) {
         infoDiv.innerHTML = `<p style='color: red;'>Fehler beim Laden der Daten:<br>${err.message}</p>`;
-        console.error(err);
+        console.error("Fehler beim Laden:", err);
       }
     }
   </script>
