@@ -1,189 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ionia Challenge</title>
-  <style>
-    body {
-      background-color: #0e1629;
-      font-family: Arial, sans-serif;
-      color: white;
-      text-align: center;
-    }
-    h1 {
-      margin-top: 20px;
-    }
-    .rank {
-      font-size: 1.2em;
-      margin-bottom: 10px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-      padding: 20px;
-      max-width: 1000px;
-      margin: auto;
-    }
-    .champion {
-      background-color: #122038;
-      border: 2px solid #1f3b5c;
-      padding: 10px;
-      border-radius: 8px;
-    }
-    .champion img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .champion-name {
-      font-weight: bold;
-      margin: 5px 0;
-    }
-    .score {
-      font-size: 0.9em;
-    }
-    .win, .loss {
-      cursor: pointer;
-      padding: 2px 6px;
-      margin: 0 4px;
-      border-radius: 4px;
-    }
-    .win { background: #3fa34d; }
-    .loss { background: #d44d5c; }
-    .selector {
-      margin: 20px auto;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-    select {
-      padding: 5px 10px;
-      font-size: 1em;
-    }
-  </style>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GG Montı - LoL Stats</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>IONIA CHALLENGE</h1>
-  <div class="selector">
-    <label>
-      Spieler wählen:
-      <select id="playerSelect">
-        <option value="Krischan">Krischan</option>
-        <option value="Anna">Anna</option>
-      </select>
-    </label>
+  <div class="container">
+    <h1>GG Montı - LoL Stats (EUW)</h1>
+    <div id="summoner-info">
+      <p>Lade Daten...</p>
+    </div>
   </div>
-  <div class="rank" id="rankDisplay">Gold II – 0 LP<br>0 Games</div>
-  <div class="grid" id="championGrid"></div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBw9yDGTBJmqgPNX4EVgGr3ftM1SbBCg1Q",
-      authDomain: "ionia-challenge.firebaseapp.com",
-      projectId: "ionia-challenge",
-      storageBucket: "ionia-challenge.firebasestorage.app",
-      messagingSenderId: "967807527667",
-      appId: "1:967807527667:web:46c519e2644fbf18faa586",
-      databaseURL: "https://ionia-challenge-default-rtdb.europe-west1.firebasedatabase.app"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const champions = [
-        "Ahri", "Akali", "Hwei", "Irelia", "Ivern",
-        "Jhin", "Karma", "Kayn", "Kennen", "LeeSin",
-        "Lillia", "MasterYi", "Wukong", "Rakan", "Sett",
-        "Shen", "Syndra", "Varus", "Xayah", "XinZhao",
-        "Yasuo", "Yone", "Zed"
-      ];
-
-      let currentPlayer = localStorage.getItem('ioniaActivePlayer') || 'Krischan';
-      document.getElementById('playerSelect').value = currentPlayer;
-
-      let state = {};
-      const grid = document.getElementById('championGrid');
-
-      function initDefaultState() {
-        const defaults = {};
-        champions.forEach(name => {
-          defaults[name] = { w: 0, l: 0 };
-        });
-        return defaults;
-      }
-
-      function renderGrid() {
-        grid.innerHTML = '';
-        champions.forEach(name => {
-          const entry = state[name] || { w: 0, l: 0 };
-          const div = document.createElement('div');
-          div.className = 'champion';
-          div.innerHTML = `
-            <img src="https://ddragon.leagueoflegends.com/cdn/14.8.1/img/champion/${name}.png" onerror="this.src='https://via.placeholder.com/50'">
-            <div class="champion-name">${name}</div>
-            <div class="score" id="score-${name}">W / L<br>${entry.w} / ${entry.l}</div>
-            <div>
-              <button class="win" data-champ="${name}" data-type="w">+W</button>
-              <button class="loss" data-champ="${name}" data-type="l">+L</button>
-            </div>
-          `;
-          grid.appendChild(div);
-        });
-        updateRank();
-        bindEvents();
-      }
-
-      function updateScore(champ, type) {
-        if (!state[champ]) state[champ] = { w: 0, l: 0 };
-        state[champ][type]++;
-        db.ref(currentPlayer).set(state);
-      }
-
-      function bindEvents() {
-        document.querySelectorAll('button.win, button.loss').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const champ = btn.getAttribute('data-champ');
-            const type = btn.getAttribute('data-type');
-            updateScore(champ, type);
-          });
-        });
-      }
-
-      function updateRank() {
-        const totalGames = Object.values(state).reduce((sum, s) => sum + s.w + s.l, 0);
-        const totalWins = Object.values(state).reduce((sum, s) => sum + s.w, 0);
-        document.getElementById('rankDisplay').innerHTML = `Gold II – ${totalWins * 10} LP<br>${totalGames} Games`;
-      }
-
-      function changePlayer() {
-        currentPlayer = document.getElementById('playerSelect').value;
-        localStorage.setItem('ioniaActivePlayer', currentPlayer);
-        listenToChanges();
-      }
-
-      function listenToChanges() {
-        db.ref(currentPlayer).off();
-        db.ref(currentPlayer).on('value', snapshot => {
-          const data = snapshot.val();
-          if (data) {
-            state = data;
-          } else {
-            state = initDefaultState();
-            db.ref(currentPlayer).set(state);
-          }
-          renderGrid();
-        });
-      }
-
-      document.getElementById('playerSelect').addEventListener('change', changePlayer);
-      listenToChanges();
-    });
-  </script>
+  <script src="main.js"></script>
 </body>
 </html>
