@@ -73,38 +73,36 @@
       try {
         const proxyUrl = "https://lol-api-proxy.onrender.com";
 
-        console.log("Frage PUUID für:", gameName, "#", tagLine);
         const riotRes = await fetch(`${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`);
-        const riotText = await riotRes.text();
-        console.log("riotText:", riotText);
-        if (!riotRes.ok) throw new Error(riotText);
-
-        const riotData = JSON.parse(riotText);
-        console.log("riotData:", riotData);
+        const riotData = await riotRes.json();
         if (!riotData.puuid) throw new Error("Riot ID nicht gefunden.");
 
-        console.log("Lade Summoner-Daten für PUUID:", riotData.puuid);
         const summRes = await fetch(`${proxyUrl}/summoner/by-puuid/${riotData.puuid}`);
-        const summText = await summRes.text();
-        console.log("summoner raw response:", summText);
-        if (!summRes.ok) throw new Error(summText);
+        const summData = await summRes.json();
+        if (!summData.id || !summData.summonerLevel) throw new Error("Summoner-Daten unvollständig.");
 
-        let summData;
-        try {
-          summData = JSON.parse(summText);
-        } catch (parseErr) {
-          console.error("Fehler beim Parsen von summoner JSON:", parseErr);
-          throw new Error("Antwort konnte nicht gelesen werden. (Ungültiges Format)");
+        // Ranked Stats abrufen
+        const rankedRes = await fetch(`${proxyUrl}/ranked/by-summoner/${summData.id}`);
+        const rankedData = await rankedRes.json();
+
+        let rankedInfo = "<p><em>Keine Ranked-Daten verfügbar.</em></p>";
+        const soloQueue = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
+        if (soloQueue) {
+          const { tier, rank, leaguePoints, wins, losses } = soloQueue;
+          const winrate = Math.round((wins / (wins + losses)) * 100);
+          rankedInfo = `
+            <p><strong>Rang:</strong> ${tier} ${rank} – ${leaguePoints} LP</p>
+            <p><strong>Wins:</strong> ${wins} – <strong>Losses:</strong> ${losses}</p>
+            <p><strong>Winrate:</strong> ${winrate}%</p>
+          `;
         }
-
-        console.log("parsed summoner:", summData);
-        if (!summData.profileIconId || !summData.summonerLevel) throw new Error("Summoner-Daten unvollständig.");
 
         infoDiv.innerHTML = `
           <p><strong>Name:</strong> ${riotData.gameName}</p>
           <p><strong>Level:</strong> ${summData.summonerLevel}</p>
           <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/profileicon/${summData.profileIconId}.png" 
               alt="Profile Icon" width="64" height="64" />
+          <div style="margin-top: 1rem;">${rankedInfo}</div>
         `;
       } catch (err) {
         infoDiv.innerHTML = `<p style='color: red;'>Fehler beim Laden der Daten:<br>${err.message}</p>`;
