@@ -101,12 +101,29 @@
           console.warn("Ranked API Antwort war kein Array:", rankedData);
         }
 
+        // Match-History (letzte 5 Spiele)
+        const matchIdsRes = await fetch(`${proxyUrl}/matches/by-puuid/${riotData.puuid}?count=5`);
+        const matchIds = await matchIdsRes.json();
+
+        let matchHistory = "<p><strong>Letzte Spiele:</strong></p><ul>";
+        for (const matchId of matchIds) {
+          const matchRes = await fetch(`${proxyUrl}/match/${matchId}`);
+          const matchData = await matchRes.json();
+          const player = matchData.info.participants.find(p => p.puuid === riotData.puuid);
+          if (player) {
+            const result = player.win ? "<span style='color:lightgreen;'>Sieg</span>" : "<span style='color:orangered;'>Niederlage</span>";
+            matchHistory += `<li>${player.championName} – ${player.kills}/${player.deaths}/${player.assists} – ${result}</li>`;
+          }
+        }
+        matchHistory += "</ul>";
+
         infoDiv.innerHTML = `
           <p><strong>Name:</strong> ${riotData.gameName}</p>
           <p><strong>Level:</strong> ${summData.summonerLevel}</p>
           <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/profileicon/${summData.profileIconId}.png" 
               alt="Profile Icon" width="64" height="64" />
           <div style="margin-top: 1rem;">${rankedInfo}</div>
+          <div style="margin-top: 1rem;">${matchHistory}</div>
         `;
       } catch (err) {
         infoDiv.innerHTML = `<p style='color: red;'>Fehler beim Laden der Daten:<br>${err.message}</p>`;
