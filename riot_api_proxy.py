@@ -21,5 +21,12 @@ RIOT_API_KEY = os.getenv("RIOT_API_KEY")  # Sicher aus Umgebungsvariablen
 def get_summoner_data(summoner_name: str):
     url = f"https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summoner_name}"
     headers = {"X-Riot-Token": RIOT_API_KEY}
+
     response = requests.get(url, headers=headers)
+
+    # ⬇️ Hilfreiches Logging
+    print(">> Request to:", url)
+    print(">> Status code:", response.status_code)
+    print(">> Response text:", response.text)
+
     return response.json()
