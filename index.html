@@ -95,6 +95,24 @@
       const matchRes = await fetch(`${proxyUrl}/match/${matchId}`);
       const matchData = await matchRes.json();
       const player = matchData.info.participants.find(p => p.puuid === riotData.puuid);
+      const allPlayers = matchData.info.participants;
+      const teamBlue = allPlayers.filter(p => p.teamId === 100);
+      const teamRed  = allPlayers.filter(p => p.teamId === 200);
+      function renderTeamList(team) {
+        return team.map(p => {
+          const champIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${p.championName}.png`;
+          return `
+            <div class="player-entry">
+              <img class="mini-champ" src="${champIcon}" title="${p.championName}" />
+              <span class="player-name">${p.riotIdGameName || p.summonerName}</span>
+            </div>
+          `;
+        }).join('');
+      }
+      const blueTeamHTML = renderTeamList(teamBlue);
+      const redTeamHTML = renderTeamList(teamRed);
+
+
 
       if (player) {
         // Runes
@@ -157,7 +175,10 @@
               <div class="kda">${player.kills} / ${player.deaths} / ${player.assists}</div>
               <div class="kda-ratio">${Math.round((player.kills + player.assists) / player.deaths)}:1 KDA</div>
             </div>
-
+             <div class="teams">
+              <div class="team blue-team">${blueTeamHTML}</div>
+              <div class="team red-team">${redTeamHTML}</div>
+            </div>
             <div class="items">
               ${itemElements}
             </div>
