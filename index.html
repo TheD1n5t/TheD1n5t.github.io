@@ -54,7 +54,12 @@ async function loadByRiotId() {
     const rankedData = await rankedRes.json();
     const soloQ = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
     const tier = soloQ ? `${soloQ.tier} ${soloQ.rank} – ${soloQ.leaguePoints} LP` : "Unranked";
-    const tierIcon = soloQ ? `<img src="https://opgg-static.akamaized.net/images/medals/${soloQ.tier.toLowerCase()}.png" alt="${soloQ.tier}" class="tier-icon">` : '';
+    const validTiers = ["iron", "bronze", "silver", "gold", "platinum", "emerald", "diamond", "master", "grandmaster", "challenger"];
+    const tierLower = soloQ?.tier?.toLowerCase();
+    const tierIcon = validTiers.includes(tierLower)
+      ? `<img src="https://opgg-static.akamaized.net/images/medals/${tierLower}.png" alt="${soloQ.tier}" class="tier-icon">`
+      : '';
+
 
     infoDiv.innerHTML = `<p><strong>${riotData.gameName}#${riotData.tagLine}</strong> (Level ${summData.summonerLevel})<br>Rang: ${tier} ${tierIcon}</p>`;
 
