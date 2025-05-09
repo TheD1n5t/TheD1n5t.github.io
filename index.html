@@ -21,7 +21,7 @@
     </div>
   </div>
 
-  <script>
+  script>
   document.getElementById("loadButton").addEventListener("click", loadByRiotId);
 
   async function loadByRiotId() {
@@ -92,8 +92,23 @@
         const rune2 = findStyleIcon(secondaryStyle);
 
         function renderTeam(players) {
-          return players.map(p => {
-            const champIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${p.championName}.png`;
+  return players.map(p => {
+    const champIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${p.championName}.png`;
+    const name = p.riotIdGameName || p.summonerName || 'Unbekannt';
+    const nameEncoded = encodeURIComponent(name);
+    return `<div class='player'>
+      <img src='${champIcon}' title='${name}' class='mini-champ'>
+      <a class='player-name' href='https://www.op.gg/summoners/euw/${nameEncoded}' target='_blank'>${name}</a>
+    </div>`;
+  }).join('');
+}.png`;
+    const name = p.riotIdGameName || p.summonerName || 'Unbekannt';
+    return `<div class='player'>
+      <img src='${champIcon}' title='${name}' class='mini-champ'>
+      <span class='player-name'>${name}</span>
+    </div>`;
+  }).join('');
+}.png`;
             return `<div class='player'><img src='${champIcon}' title='${p.riotIdGameName || p.summonerName}' class='mini-champ'></div>`;
           }).join('');
         }
