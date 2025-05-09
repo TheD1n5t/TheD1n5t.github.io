@@ -72,15 +72,20 @@
 
       try {
         const proxyUrl = "https://lol-api-proxy.onrender.com";
-        const riotRes = await fetch(`${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`);
-        const riotData = await riotRes.json();
 
-        if (!riotRes.ok || riotData.status) throw new Error("Riot ID nicht gefunden");
+        const riotRes = await fetch(`${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`);
+        const riotText = await riotRes.text();
+        if (!riotRes.ok) throw new Error(riotText);
+
+        const riotData = JSON.parse(riotText);
+        if (!riotData.puuid) throw new Error("Riot ID nicht gefunden.");
 
         const summRes = await fetch(`${proxyUrl}/summoner/by-puuid/${riotData.puuid}`);
-        const summData = await summRes.json();
+        const summText = await summRes.text();
+        if (!summRes.ok) throw new Error(summText);
 
-        if (!summRes.ok || summData.status) throw new Error("Summoner-Daten nicht gefunden");
+        const summData = JSON.parse(summText);
+        if (!summData.name) throw new Error("Summoner-Daten ungültig.");
 
         infoDiv.innerHTML = `
           <p><strong>Name:</strong> ${summData.name}</p>
