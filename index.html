@@ -24,156 +24,161 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("loadButton").addEventListener("click", loadByRiotId); });
+  document.getElementById("loadButton").addEventListener("click", loadByRiotId);
+});
 
-  async function loadByRiotId() {
-    const input = document.getElementById("riotIdInput").value;
-    const infoDiv = document.getElementById("summoner-info");
-    const matchHistoryDiv = document.getElementById("match-history");
-    infoDiv.innerHTML = "<p>Lade Daten...</p>";
+async function loadByRiotId() {
+  const input = document.getElementById("riotIdInput").value;
+  const infoDiv = document.getElementById("summoner-info");
+  const matchHistoryDiv = document.getElementById("match-history");
+  infoDiv.innerHTML = "<p>Lade Daten...</p>";
 
-    const [gameName, tagLine] = input.split("#");
-    if (!gameName || !tagLine) {
-      infoDiv.innerHTML = "<p style='color: red;'>Bitte eine gültige Riot ID im Format Name#Tag eingeben.</p>";
-      return;
-    }
+  const [gameName, tagLine] = input.split("#");
+  if (!gameName || !tagLine) {
+    infoDiv.innerHTML = "<p style='color: red;'>Bitte eine gültige Riot ID im Format Name#Tag eingeben.</p>";
+    return;
+  }
 
-    try {
-      const proxyUrl = "https://lol-api-proxy.onrender.com";
-      const runesData = await fetch("https://ddragon.leagueoflegends.com/cdn/15.9.1/data/en_US/runesReforged.json").then(r => r.json());
-      const spellData = await fetch("https://ddragon.leagueoflegends.com/cdn/15.9.1/data/en_US/summoner.json").then(r => r.json());
+  try {
+    const proxyUrl = "https://lol-api-proxy.onrender.com";
+    const runesData = await fetch("https://ddragon.leagueoflegends.com/cdn/15.9.1/data/en_US/runesReforged.json").then(r => r.json());
+    const spellData = await fetch("https://ddragon.leagueoflegends.com/cdn/15.9.1/data/en_US/summoner.json").then(r => r.json());
 
-      const riotRes = await fetch(`${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`);
-      const riotData = await riotRes.json();
-      if (!riotData.puuid) throw new Error("Riot ID nicht gefunden.");
+    const riotRes = await fetch(`${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`);
+    const riotData = await riotRes.json();
+    if (!riotData.puuid) throw new Error("Riot ID nicht gefunden.");
 
-      const summRes = await fetch(`${proxyUrl}/summoner/by-puuid/${riotData.puuid}`);
-      const summData = await summRes.json();
-      const rankedRes = await fetch(`${proxyUrl}/ranked/by-summoner/${summData.id}`);
-      const rankedData = await rankedRes.json();
-      const soloQ = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
-      const tier = soloQ ? `${soloQ.tier} ${soloQ.rank} – ${soloQ.leaguePoints} LP` : "Unranked";
+    const summRes = await fetch(`${proxyUrl}/summoner/by-puuid/${riotData.puuid}`);
+    const summData = await summRes.json();
+    const rankedRes = await fetch(`${proxyUrl}/ranked/by-summoner/${summData.id}`);
+    const rankedData = await rankedRes.json();
+    const soloQ = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
+    const tier = soloQ ? `${soloQ.tier} ${soloQ.rank} – ${soloQ.leaguePoints} LP` : "Unranked";
+    const tierIcon = soloQ ? `<img src="https://opgg-static.akamaized.net/images/medals/${soloQ.tier.toLowerCase()}.png" alt="${soloQ.tier}" class="tier-icon">` : '';
 
-      infoDiv.innerHTML = `<p><strong>${riotData.gameName}#${riotData.tagLine}</strong> (Level ${summData.summonerLevel})<br>Rang: ${tier}</p>`;
+    infoDiv.innerHTML = `<p><strong>${riotData.gameName}#${riotData.tagLine}</strong> (Level ${summData.summonerLevel})<br>Rang: ${tier} ${tierIcon}</p>`;
 
-      const matchIdsRes = await fetch(`${proxyUrl}/matches/by-puuid/${riotData.puuid}?count=5`);
-      const matchIds = await matchIdsRes.json();
+    const matchIdsRes = await fetch(`${proxyUrl}/matches/by-puuid/${riotData.puuid}?count=5`);
+    const matchIds = await matchIdsRes.json();
 
-      let matchHistoryHTML = "<h2>Letzte Spiele:</h2>";
+    let matchHistoryHTML = "<h2>Letzte Spiele:</h2>";
 
-      for (const matchId of matchIds) {
-        const matchRes = await fetch(`${proxyUrl}/match/${matchId}`);
-        const matchData = await matchRes.json();
-        const allPlayers = matchData.info.participants;
-        const player = allPlayers.find(p => p.puuid === riotData.puuid);
-        const teamBlue = allPlayers.filter(p => p.teamId === 100);
-        const teamRed = allPlayers.filter(p => p.teamId === 200);
+    for (const matchId of matchIds) {
+      const matchRes = await fetch(`${proxyUrl}/match/${matchId}`);
+      const matchData = await matchRes.json();
+      const allPlayers = matchData.info.participants;
+      const player = allPlayers.find(p => p.puuid === riotData.puuid);
+      const teamBlue = allPlayers.filter(p => p.teamId === 100);
+      const teamRed = allPlayers.filter(p => p.teamId === 200);
 
-        const championIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${player.championName}.png`;
-        const summ1 = Object.values(spellData.data).find(spell => parseInt(spell.key) === player.summoner1Id)?.image.full;
-        const summ2 = Object.values(spellData.data).find(spell => parseInt(spell.key) === player.summoner2Id)?.image.full;
+      const championIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${player.championName}.png`;
+      const summ1 = Object.values(spellData.data).find(spell => parseInt(spell.key) === player.summoner1Id)?.image.full;
+      const summ2 = Object.values(spellData.data).find(spell => parseInt(spell.key) === player.summoner2Id)?.image.full;
 
-        const itemHTML = Array.from({ length: 7 }, (_, i) => player[`item${i}`] > 0
-          ? `<img src='https://ddragon.leagueoflegends.com/cdn/15.9.1/img/item/${player[`item${i}`]}.png' class='item'>`
-          : '').join('');
+      const itemHTML = Array.from({ length: 7 }, (_, i) => player[`item${i}`] > 0
+        ? `<img src='https://ddragon.leagueoflegends.com/cdn/15.9.1/img/item/${player[`item${i}`]}.png' class='item'>`
+        : '').join('');
 
-        const primaryRune = player.perks.styles[0]?.selections[0]?.perk;
-        const secondaryStyle = player.perks.styles[1]?.style;
-        function findRuneIcon(id) {
-          for (const style of runesData) {
-            for (const slot of style.slots) {
-              for (const rune of slot.runes) {
-                if (rune.id === id) return rune.icon;
-              }
+      const primaryRune = player.perks.styles[0]?.selections[0]?.perk;
+      const secondaryStyle = player.perks.styles[1]?.style;
+
+      function findRuneIcon(id) {
+        for (const style of runesData) {
+          for (const slot of style.slots) {
+            for (const rune of slot.runes) {
+              if (rune.id === id) return rune.icon;
             }
           }
-          return null;
         }
-        const findStyleIcon = id => runesData.find(style => style.id === id)?.icon || null;
-        const rune1 = findRuneIcon(primaryRune);
-        const rune2 = findStyleIcon(secondaryStyle);
-
-        function renderTeam(players) {
-  return players.map(p => {
-    const champIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${p.championName}.png`;
-    const name = p.riotIdGameName || p.summonerName || 'Unbekannt';
-    const nameEncoded = encodeURIComponent(name);
-    return `<div class='player'>
-      <img src='${champIcon}' title='${name}' class='mini-champ'>
-      <a class='player-name' href='https://www.op.gg/summoners/euw/${nameEncoded}#${tagLine}' target='_blank'>${name}</a>
-    </div>`;
-  }).join('');
-}
-
-        const durationMin = Math.floor(matchData.info.gameDuration / 60);
-
-        const matchMainHTML = `
-          <div class="match-main">
-            <div class="match-header">
-              <span>${matchData.info.queueId === 420 ? 'Ranked' : 'Normal'} – ${durationMin} Min</span>
-            </div>
-            <img class="champ-icon" src="${championIcon}" alt="${player.championName}" />
-            <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${summ1}" />
-            <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${summ2}" />
-            ${rune1 ? `<img class="rune" src="https://ddragon.leagueoflegends.com/cdn/img/${rune1}" />` : ''}
-            ${rune2 ? `<img class="rune" src="https://ddragon.leagueoflegends.com/cdn/img/${rune2}" />` : ''}
-            <div class="kda">${player.kills} / ${player.deaths} / ${player.assists}</div>
-            <div class="result">${player.win ? 'Sieg' : 'Niederlage'}</div>
-            <div class="items">${itemHTML}</div>
-            <div class="teams">
-              <div class="team blue">${renderTeam(teamBlue)}</div>
-              <div class="team red">${renderTeam(teamRed)}</div>
-            </div>
-          </div>
-        `;
-
-        const killsBlue = teamBlue.reduce((a, b) => a + b.kills, 0);
-        const killsRed = teamRed.reduce((a, b) => a + b.kills, 0);
-        const goldBlue = teamBlue.reduce((a, b) => a + b.goldEarned, 0);
-        const goldRed = teamRed.reduce((a, b) => a + b.goldEarned, 0);
-        const csBlue = teamBlue.reduce((a, b) => a + b.totalMinionsKilled + b.neutralMinionsKilled, 0);
-        const csRed = teamRed.reduce((a, b) => a + b.totalMinionsKilled + b.neutralMinionsKilled, 0);
-        const dmgBlue = teamBlue.reduce((a, b) => a + b.totalDamageDealtToChampions, 0);
-        const dmgRed = teamRed.reduce((a, b) => a + b.totalDamageDealtToChampions, 0);
-        const takenBlue = teamBlue.reduce((a, b) => a + b.totalDamageTaken, 0);
-        const takenRed = teamRed.reduce((a, b) => a + b.totalDamageTaken, 0);
-        const visionBlue = teamBlue.reduce((a, b) => a + b.visionScore, 0);
-        const visionRed = teamRed.reduce((a, b) => a + b.visionScore, 0);
-
-        const teamAnalysisHTML = `
-          <div class="team-analysis-wrapper">
-            <button class="toggle-analysis">Team-Analyse anzeigen ▼</button>
-            <div class="team-analysis" style="display:none">
-              <table>
-                <tr><th>Stat</th><th style="color:#38f;">Blau</th><th style="color:#f44;">Rot</th></tr>
-                <tr><td>Kills</td><td>${killsBlue}</td><td>${killsRed}</td></tr>
-                <tr><td>Gold</td><td>${goldBlue}</td><td>${goldRed}</td></tr>
-                <tr><td>Schaden</td><td>${dmgBlue}</td><td>${dmgRed}</td></tr>
-                <tr><td>Erlittener Schaden</td><td>${takenBlue}</td><td>${takenRed}</td></tr>
-                <tr><td>CS</td><td>${csBlue}</td><td>${csRed}</td></tr>
-                <tr><td>Wards</td><td>${visionBlue}</td><td>${visionRed}</td></tr>
-              </table>
-            </div>
-          </div>
-        `;
-
-        matchHistoryHTML += `<div class="match-block">${matchMainHTML}${teamAnalysisHTML}</div>`;
+        return null;
       }
 
-      matchHistoryDiv.innerHTML = matchHistoryHTML;
-      document.querySelectorAll('.toggle-analysis').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const panel = btn.nextElementSibling;
-          const open = panel.style.display === 'block';
-          panel.style.display = open ? 'none' : 'block';
-          btn.innerHTML = open ? 'Team-Analyse anzeigen ▼' : 'Team-Analyse verbergen ▲';
-        });
-      });
-    } catch (err) {
-      infoDiv.innerHTML = `<p style="color:red;">Fehler beim Laden der Daten: ${err.message}</p>`;
-      console.error("Fehler beim Laden:", err);
+      const findStyleIcon = id => runesData.find(style => style.id === id)?.icon || null;
+      const rune1 = findRuneIcon(primaryRune);
+      const rune2 = findStyleIcon(secondaryStyle);
+
+      function renderTeam(players) {
+        return players.map(p => {
+          const champIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${p.championName}.png`;
+          const name = p.riotIdGameName || p.summonerName || 'Unbekannt';
+          const nameEncoded = encodeURIComponent(name);
+          return `<div class='player'>
+            <img src='${champIcon}' title='${name}' class='mini-champ'>
+            <a class='player-name' href='https://www.op.gg/summoners/euw/${nameEncoded}' target='_blank'>${name}</a>
+          </div>`;
+        }).join('');
+      }
+
+      const durationMin = Math.floor(matchData.info.gameDuration / 60);
+
+      const matchMainHTML = `
+        <div class="match-main">
+          <div class="match-header">
+            <span>${matchData.info.queueId === 420 ? 'Ranked' : 'Normal'} – ${durationMin} Min</span>
+          </div>
+          <img class="champ-icon" src="${championIcon}" alt="${player.championName}" />
+          <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${summ1}" />
+          <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${summ2}" />
+          ${rune1 ? `<img class="rune" src="https://ddragon.leagueoflegends.com/cdn/img/${rune1}" />` : ''}
+          ${rune2 ? `<img class="rune" src="https://ddragon.leagueoflegends.com/cdn/img/${rune2}" />` : ''}
+          <div class="kda">${player.kills} / ${player.deaths} / ${player.assists}</div>
+          <div class="result">${player.win ? 'Sieg' : 'Niederlage'}</div>
+          <div class="items">${itemHTML}</div>
+          <div class="teams">
+            <div class="team blue">${renderTeam(teamBlue)}</div>
+            <div class="team red">${renderTeam(teamRed)}</div>
+          </div>
+        </div>
+      `;
+
+      const killsBlue = teamBlue.reduce((a, b) => a + b.kills, 0);
+      const killsRed = teamRed.reduce((a, b) => a + b.kills, 0);
+      const goldBlue = teamBlue.reduce((a, b) => a + b.goldEarned, 0);
+      const goldRed = teamRed.reduce((a, b) => a + b.goldEarned, 0);
+      const csBlue = teamBlue.reduce((a, b) => a + b.totalMinionsKilled + b.neutralMinionsKilled, 0);
+      const csRed = teamRed.reduce((a, b) => a + b.totalMinionsKilled + b.neutralMinionsKilled, 0);
+      const dmgBlue = teamBlue.reduce((a, b) => a + b.totalDamageDealtToChampions, 0);
+      const dmgRed = teamRed.reduce((a, b) => a + b.totalDamageDealtToChampions, 0);
+      const takenBlue = teamBlue.reduce((a, b) => a + b.totalDamageTaken, 0);
+      const takenRed = teamRed.reduce((a, b) => a + b.totalDamageTaken, 0);
+      const visionBlue = teamBlue.reduce((a, b) => a + b.visionScore, 0);
+      const visionRed = teamRed.reduce((a, b) => a + b.visionScore, 0);
+
+      const teamAnalysisHTML = `
+        <div class="team-analysis-wrapper">
+          <button class="toggle-analysis">Team-Analyse anzeigen ▼</button>
+          <div class="team-analysis" style="display:none">
+            <table>
+              <tr><th>Stat</th><th style="color:#38f;">Blau</th><th style="color:#f44;">Rot</th></tr>
+              <tr><td>Kills</td><td>${killsBlue}</td><td>${killsRed}</td></tr>
+              <tr><td>Gold</td><td>${goldBlue}</td><td>${goldRed}</td></tr>
+              <tr><td>Schaden</td><td>${dmgBlue}</td><td>${dmgRed}</td></tr>
+              <tr><td>Erlittener Schaden</td><td>${takenBlue}</td><td>${takenRed}</td></tr>
+              <tr><td>CS</td><td>${csBlue}</td><td>${csRed}</td></tr>
+              <tr><td>Wards</td><td>${visionBlue}</td><td>${visionRed}</td></tr>
+            </table>
+          </div>
+        </div>
+      `;
+
+      matchHistoryHTML += `<div class="match-block">${matchMainHTML}${teamAnalysisHTML}</div>`;
     }
+
+    matchHistoryDiv.innerHTML = matchHistoryHTML;
+    document.querySelectorAll('.toggle-analysis').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const panel = btn.nextElementSibling;
+        const open = panel.style.display === 'block';
+        panel.style.display = open ? 'none' : 'block';
+        btn.innerHTML = open ? 'Team-Analyse anzeigen ▼' : 'Team-Analyse verbergen ▲';
+      });
+    });
+  } catch (err) {
+    infoDiv.innerHTML = `<p style="color:red;">Fehler beim Laden der Daten: ${err.message}</p>`;
+    console.error("Fehler beim Laden:", err);
   }
+}
+
 </script>
 </body>
 </html>
