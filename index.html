@@ -26,6 +26,8 @@
   const input = document.getElementById("riotIdInput").value;
   const infoDiv = document.getElementById("summoner-info");
   const matchHistoryDiv = document.getElementById("match-history");
+  const runesData = await fetch("https://ddragon.leagueoflegends.com/cdn/15.9.1/data/en_US/runesReforged.json").then(r => r.json());
+
   infoDiv.innerHTML = "<p>Lade Daten...</p>";
 
   const [gameName, tagLine] = input.split("#");
@@ -52,6 +54,22 @@
     const matchIds = await matchIdsRes.json();
 
     let matchHistoryHTML = "<h2>Letzte Spiele:</h2>";
+    function findRuneIcon(perkId) {
+      for (const style of runesData) {
+        for (const slot of style.slots) {
+          for (const rune of slot.runes) {
+            if (rune.id === perkId) return rune.icon;
+          }
+        }
+      }
+      return null;
+    }
+
+    function findStyleIcon(styleId) {
+      const style = runesData.find(s => s.id === styleId);
+      return style ? style.icon : null;
+    }
+
     for (const matchId of matchIds) {
       const matchRes = await fetch(`${proxyUrl}/match/${matchId}`);
       const matchData = await matchRes.json();
@@ -59,12 +77,15 @@
 
       if (player) {
         // Runes
-        const primaryRuneStyle = player.perks.styles[0]?.style;
         const primaryRune = player.perks.styles[0]?.selections[0]?.perk;
         const secondaryRuneStyle = player.perks.styles[1]?.style;
         
-        const runeImg = (id) =>
-          id ? `<img class="rune" src="https://ddragon.canisback.com/img/${id}.png" />` : '';
+        const primaryRuneIcon = findRuneIcon(primaryRune);
+        const secondaryRuneIcon = findStyleIcon(secondaryRuneStyle);
+        
+        const runeImg = (icon) =>
+          icon ? `<img class="rune" src="https://ddragon.leagueoflegends.com/cdn/img/${icon}" />` : '';
+
 
         const result = player.win ? "<span style='color:lightgreen;'>Sieg</span>" : "<span style='color:orangered;'>Niederlage</span>";
         const championIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${player.championName}.png`;
@@ -102,9 +123,10 @@
                 <div class="level">${player.champLevel}</div>
               </div>
               <div class="spells-runes">
-                <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${player.summoner1Id}.png" />
-                <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${player.summoner2Id}.png" />
-                ${runeImg(primaryRune)}${runeImg(secondaryRuneStyle)}
+                <div class="spells-runes">
+                  <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${player.summoner1Id}.png" />
+                  <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${player.summoner2Id}.png" />
+                  ${runeImg(primaryRuneIcon)}${runeImg(secondaryRuneIcon)}
               </div>
             </div>
 
