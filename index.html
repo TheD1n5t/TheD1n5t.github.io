@@ -23,82 +23,90 @@
 
   <script>
     async function loadByRiotId() {
-      const input = document.getElementById("riotIdInput").value;
-      const infoDiv = document.getElementById("summoner-info");
-      const matchHistoryDiv = document.getElementById("match-history");
-      infoDiv.innerHTML = "<p>Lade Daten...</p>";
+  const input = document.getElementById("riotIdInput").value;
+  const infoDiv = document.getElementById("summoner-info");
+  const matchHistoryDiv = document.getElementById("match-history");
+  infoDiv.innerHTML = "<p>Lade Daten...</p>";
 
-      const [gameName, tagLine] = input.split("#");
-      if (!gameName || !tagLine) {
-        infoDiv.innerHTML = "<p style='color: red;'>Bitte eine gültige Riot ID im Format Name#Tag eingeben.</p>";
-        return;
-      }
+  const [gameName, tagLine] = input.split("#");
+  if (!gameName || !tagLine) {
+    infoDiv.innerHTML = "<p style='color: red;'>Bitte eine gültige Riot ID im Format Name#Tag eingeben.</p>";
+    return;
+  }
 
-      try {
-        const proxyUrl = "https://lol-api-proxy.onrender.com";
+  try {
+    const proxyUrl = "https://lol-api-proxy.onrender.com";
 
-        // Riot ID abrufen
-        const riotRes = await fetch(`${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`);
-        const riotData = await riotRes.json();
-        if (!riotData.puuid) throw new Error("Riot ID nicht gefunden.");
+    // Riot ID abrufen
+    const riotRes = await fetch(`${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`);
+    const riotData = await riotRes.json();
+    if (!riotData.puuid) throw new Error("Riot ID nicht gefunden.");
 
-        // Summoner-Daten abrufen
-        const summRes = await fetch(`${proxyUrl}/summoner/by-puuid/${riotData.puuid}`);
-        const summData = await summRes.json();
-        if (!summData.id || !summData.summonerLevel) throw new Error("Summoner-Daten unvollständig.");
+    // Summoner-Daten abrufen
+    const summRes = await fetch(`${proxyUrl}/summoner/by-puuid/${riotData.puuid}`);
+    const summData = await summRes.json();
+    if (!summData.id || !summData.summonerLevel) throw new Error("Summoner-Daten unvollständig.");
 
-        // Match-History (letzte 5 Spiele)
-        const matchIdsRes = await fetch(`${proxyUrl}/matches/by-puuid/${riotData.puuid}?count=5`);
-        const matchIds = await matchIdsRes.json();
+    // Match-History (letzte 5 Spiele)
+    const matchIdsRes = await fetch(`${proxyUrl}/matches/by-puuid/${riotData.puuid}?count=5`);
+    const matchIds = await matchIdsRes.json();
 
-        let matchHistoryHTML = "<h2>Letzte Spiele:</h2>";
-        for (const matchId of matchIds) {
-          const matchRes = await fetch(`${proxyUrl}/match/${matchId}`);
-          const matchData = await matchRes.json();
-          const player = matchData.info.participants.find(p => p.puuid === riotData.puuid);
+    let matchHistoryHTML = "<h2>Letzte Spiele:</h2>";
+    for (const matchId of matchIds) {
+      const matchRes = await fetch(`${proxyUrl}/match/${matchId}`);
+      const matchData = await matchRes.json();
+      const player = matchData.info.participants.find(p => p.puuid === riotData.puuid);
 
-          if (player) {
-            const result = player.win ? "<span style='color:lightgreen;'>Sieg</span>" : "<span style='color:orangered;'>Niederlage</span>";
-            const championIcon = `https://ddragon.leagueoflegends.com/cdn/13.24.1/img/champion/${player.championName}.png`;
-            
-            matchHistoryHTML += `
-              <div class="match-card ${player.win ? 'win' : 'loss'}">
-                <div class="match-mode">
-                  <div class="mode">${matchData.info.queueId === 420 ? 'Ranked' : 'Normal'}</div>
-                  <div class="time">${new Date(matchData.info.gameCreation).toLocaleString()}</div>
-                  <div class="duration">${Math.floor(matchData.info.gameDuration / 60)} Min</div>
-                </div>
+      if (player) {
+        const result = player.win ? "<span style='color:lightgreen;'>Sieg</span>" : "<span style='color:orangered;'>Niederlage</span>";
+        const championIcon = `https://ddragon.leagueoflegends.com/cdn/13.24.1/img/champion/${player.championName}.png`;
 
-                <div class="champion-block">
-                  <div class="champion">
-                    <img class="champ-icon" src="${championIcon}" alt="${player.championName}" />
-                    <div class="level">${player.championLevel}</div>
-                  </div>
-                  <div class="spells-runes">
-                    <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/spell/${player.summoner1Id}.png" />
-                    <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/spell/${player.summoner2Id}.png" />
-                  </div>
-                </div>
+        // Sicherstellen, dass player.items definiert ist, ansonsten mit leeren Array arbeiten
+        const items = Array.isArray(player.items) ? player.items : [];
 
-                <div class="stats">
-                  <div class="kda">${player.kills} / ${player.deaths} / ${player.assists}</div>
-                  <div class="kda-ratio">${Math.round((player.kills + player.assists) / player.deaths)}:1 KDA</div>
-                </div>
+        // Dynamisch Item-Bilder rendern
+        const itemElements = items.map(itemId => 
+          `<img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/${itemId}.png" />`).join('');
 
-                <div class="items">
-                  ${player.items.map(itemId => `<img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/${itemId}.png" />`).join('')}
-                </div>
+        matchHistoryHTML += `
+          <div class="match-card ${player.win ? 'win' : 'loss'}">
+            <div class="match-mode">
+              <div class="mode">${matchData.info.queueId === 420 ? 'Ranked' : 'Normal'}</div>
+              <div class="time">${new Date(matchData.info.gameCreation).toLocaleString()}</div>
+              <div class="duration">${Math.floor(matchData.info.gameDuration / 60)} Min</div>
+            </div>
+
+            <div class="champion-block">
+              <div class="champion">
+                <img class="champ-icon" src="${championIcon}" alt="${player.championName}" />
+                <div class="level">${player.championLevel}</div>
               </div>
-            `;
-          }
-        }
+              <div class="spells-runes">
+                <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/spell/${player.summoner1Id}.png" />
+                <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/spell/${player.summoner2Id}.png" />
+              </div>
+            </div>
 
-        matchHistoryDiv.innerHTML = matchHistoryHTML;
-      } catch (err) {
-        infoDiv.innerHTML = `<p style='color: red;'>Fehler beim Laden der Daten:<br>${err.message}</p>`;
-        console.error("Fehler beim Laden:", err);
+            <div class="stats">
+              <div class="kda">${player.kills} / ${player.deaths} / ${player.assists}</div>
+              <div class="kda-ratio">${Math.round((player.kills + player.assists) / player.deaths)}:1 KDA</div>
+            </div>
+
+            <div class="items">
+              ${itemElements || "<p>Keine Items verfügbar.</p>"}
+            </div>
+          </div>
+        `;
       }
     }
+
+    matchHistoryDiv.innerHTML = matchHistoryHTML;
+  } catch (err) {
+    infoDiv.innerHTML = `<p style='color: red;'>Fehler beim Laden der Daten:<br>${err.message}</p>`;
+    console.error("Fehler beim Laden:", err);
+  }
+}
+
   </script>
 </body>
 </html>
