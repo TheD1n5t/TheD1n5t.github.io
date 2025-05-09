@@ -59,15 +59,20 @@
 
       if (player) {
         const result = player.win ? "<span style='color:lightgreen;'>Sieg</span>" : "<span style='color:orangered;'>Niederlage</span>";
-        const championIcon = `https://ddragon.leagueoflegends.com/cdn/13.24.1/img/champion/${player.championName}.png`;
+        const championIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${player.championName}.png`;
 
         // Sicherstellen, dass player.items definiert ist und nicht leer ist
         const items = Array.isArray(player.items) && player.items.length > 0 ? player.items : [];
 
+        // Debugging-Ausgabe für Items
+        if (items.length === 0) {
+          console.log("Keine Items verfügbar für Spieler", player.championName);
+        }
+
         // Dynamisch Item-Bilder rendern, falls vorhanden
         const itemElements = items.length > 0 
           ? items.map(itemId => 
-              `<img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/${itemId}.png" />`).join('')
+              `<img src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/item/${itemId}.png" />`).join('')
           : "<p>Keine Items verfügbar.</p>";
 
         matchHistoryHTML += `
@@ -84,8 +89,8 @@
                 <div class="level">${player.championLevel}</div>
               </div>
               <div class="spells-runes">
-                <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/spell/${player.summoner1Id}.png" />
-                <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/spell/${player.summoner2Id}.png" />
+                <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${player.summoner1Id}.png" />
+                <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/15.9.1/img/spell/${player.summoner2Id}.png" />
               </div>
             </div>
 
