@@ -1,28 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mächtiger Donut - LoL Stats</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="container">
-    <h1>LoL Stats per Riot ID</h1>
-    <input type="text" id="riotIdInput" placeholder="z. B. Mächtiger Donut#EUW" />
-    <button id="loadButton">Riot ID laden</button>
-
-    <div id="summoner-info">
-      <p>Bitte Riot ID eingeben.</p>
-    </div>
-
-    <div id="match-history">
-      <!-- Dynamische Match History wird hier geladen -->
-    </div>
-  </div>
-
-
-<script>
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loadButton").addEventListener("click", loadByRiotId);
 });
@@ -54,12 +29,12 @@ async function loadByRiotId() {
     const rankedData = await rankedRes.json();
     const soloQ = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
     const tier = soloQ ? `${soloQ.tier} ${soloQ.rank} – ${soloQ.leaguePoints} LP` : "Unranked";
+
     const validTiers = ["iron", "bronze", "silver", "gold", "platinum", "emerald", "diamond", "master", "grandmaster", "challenger"];
     const tierLower = soloQ?.tier?.toLowerCase();
     const tierIcon = validTiers.includes(tierLower)
       ? `<img src="https://opgg-static.akamaized.net/images/medals/${tierLower}.png" alt="${soloQ.tier}" class="tier-icon">`
       : '';
-
 
     infoDiv.innerHTML = `<p><strong>${riotData.gameName}#${riotData.tagLine}</strong> (Level ${summData.summonerLevel})<br>Rang: ${tier} ${tierIcon}</p>`;
 
@@ -183,7 +158,3 @@ async function loadByRiotId() {
     console.error("Fehler beim Laden:", err);
   }
 }
-
-</script>
-</body>
-</html>
