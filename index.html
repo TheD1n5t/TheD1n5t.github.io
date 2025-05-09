@@ -21,8 +21,11 @@
     </div>
   </div>
 
-  <script>
-  document.getElementById("loadButton").addEventListener("click", loadByRiotId);
+ // ... (gleicher HTML-Kopf wie bisher)
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("loadButton").addEventListener("click", loadByRiotId); });
 
   async function loadByRiotId() {
     const input = document.getElementById("riotIdInput").value;
@@ -183,5 +186,8 @@
     }
   }
 </script>
+</body>
+</html>
+
 </body>
 </html>
