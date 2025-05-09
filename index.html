@@ -62,8 +62,13 @@
         const championIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${player.championName}.png`;
 
         // Sicherstellen, dass player.items definiert ist und nicht leer ist
-        const items = Array.isArray(player.items) && player.items.length > 0 ? player.items : [];
-
+        const itemIds = [];
+        for (let i = 0; i <= 6; i++) {
+          const itemId = player[`item${i}`];
+          if (itemId && itemId !== 0) {
+            itemIds.push(itemId);
+          }
+        }
         // Debugging-Ausgabe für Items
         if (items.length === 0) {
           console.log("Keine Items verfügbar für Spieler", player.championName);
