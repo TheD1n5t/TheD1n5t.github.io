@@ -86,15 +86,19 @@
         const rankedData = await rankedRes.json();
 
         let rankedInfo = "<p><em>Keine Ranked-Daten verfügbar.</em></p>";
-        const soloQueue = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
-        if (soloQueue) {
-          const { tier, rank, leaguePoints, wins, losses } = soloQueue;
-          const winrate = Math.round((wins / (wins + losses)) * 100);
-          rankedInfo = `
-            <p><strong>Rang:</strong> ${tier} ${rank} – ${leaguePoints} LP</p>
-            <p><strong>Wins:</strong> ${wins} – <strong>Losses:</strong> ${losses}</p>
-            <p><strong>Winrate:</strong> ${winrate}%</p>
-          `;
+        if (Array.isArray(rankedData)) {
+          const soloQueue = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
+          if (soloQueue) {
+            const { tier, rank, leaguePoints, wins, losses } = soloQueue;
+            const winrate = Math.round((wins / (wins + losses)) * 100);
+            rankedInfo = `
+              <p><strong>Rang:</strong> ${tier} ${rank} – ${leaguePoints} LP</p>
+              <p><strong>Wins:</strong> ${wins} – <strong>Losses:</strong> ${losses}</p>
+              <p><strong>Winrate:</strong> ${winrate}%</p>
+            `;
+          }
+        } else {
+          console.warn("Ranked API Antwort war kein Array:", rankedData);
         }
 
         infoDiv.innerHTML = `
