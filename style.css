@@ -94,3 +94,67 @@ li.match-card {
   color: #dc3545;
   font-weight: 600;
 }
+
+.match-card {
+  display: flex;
+  align-items: center;
+  background-color: #f1f3f5;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.match-card.win {
+  border-left: 5px solid #28a745;
+}
+
+.match-card.loss {
+  border-left: 5px solid #dc3545;
+}
+
+.champion {
+  position: relative;
+  margin-right: 1rem;
+}
+
+.champion-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+}
+
+.level {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  background: #222;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.info {
+  flex-grow: 1;
+}
+
+.kda {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.details {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.items img {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  margin-right: 4px;
+  background: #ddd;
+}
+
