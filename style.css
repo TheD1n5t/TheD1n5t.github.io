@@ -1,91 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+body {
+  background-color: #f9f9f9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1d1d1f;
+  margin: 0;
+  padding: 0;
+}
 
-  body {
-    background-color: #0b0c10;
-    color: #f8f8f2;
-    font-family: 'Montserrat', sans-serif;
-    margin: 0;
-    padding: 0;
-  }
+.container {
+  max-width: 800px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+}
 
-  .container {
-    max-width: 800px;
-    margin: 4rem auto;
-    padding: 2rem;
-    background-color: #1f2833;
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.6);
-  }
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2.5rem;
+  color: #1d1d1f;
+}
 
-  h1 {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: #66fcf1;
-    font-size: 2rem;
-    letter-spacing: 1px;
-  }
+input {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid #d0d0d0;
+  background-color: #f2f2f2;
+  color: #1d1d1f;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
 
-  input, button {
-    display: block;
-    margin: 1rem auto;
-    padding: 0.7rem 1rem;
-    font-size: 1rem;
-    border-radius: 8px;
-    border: none;
-    width: 80%;
-    box-sizing: border-box;
-  }
+button {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background-color: #0071e3;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
 
-  input {
-    background-color: #c5c6c7;
-    color: #0b0c10;
-  }
+button:hover {
+  background-color: #005bb5;
+}
 
-  button {
-    background-color: #66fcf1;
-    color: #0b0c10;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
+#summoner-info {
+  margin-top: 2rem;
+  text-align: center;
+}
 
-  button:hover {
-    background-color: #45a29e;
-  }
+#summoner-info img {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  margin: 1rem 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-  #summoner-info {
-    margin-top: 2rem;
-    line-height: 1.6;
-    font-size: 1.1rem;
-  }
+ul {
+  padding: 0;
+  margin: 1.5rem 0;
+  list-style: none;
+}
 
-  #summoner-info p {
-    text-align: center;
-  }
+li.match-card {
+  background-color: #f5f5f7;
+  margin: 0.5rem 0;
+  padding: 1rem 1.2rem;
+  border-radius: 16px;
+  text-align: left;
+  font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-  #summoner-info img {
-    display: block;
-    margin: 1rem auto;
-    border-radius: 50%;
-    box-shadow: 0 0 10px #66fcf1;
-  }
+.result-win {
+  color: #28a745;
+  font-weight: 600;
+}
 
-  ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  li {
-    background-color: #0b0c10;
-    margin: 0.5rem 0;
-    padding: 0.6rem 1rem;
-    border-left: 4px solid #66fcf1;
-    border-radius: 6px;
-  }
-
-  li span {
-    font-weight: bold;
-  }
-</style>
+.result-loss {
+  color: #dc3545;
+  font-weight: 600;
+}
