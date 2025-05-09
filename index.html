@@ -10,7 +10,7 @@
   <div class="container">
     <h1>LoL Stats per Riot ID</h1>
     <input type="text" id="riotIdInput" placeholder="z. B. Mächtiger Donut#EUW" />
-    <button onclick="loadByRiotId()">Riot ID laden</button>
+    <button id="loadButton">Riot ID laden</button>
 
     <div id="summoner-info">
       <p>Bitte Riot ID eingeben.</p>
@@ -22,6 +22,8 @@
   </div>
 
   <script>
+    document.getElementById("loadButton").addEventListener("click", loadByRiotId);
+
     async function loadByRiotId() {
       const input = document.getElementById("riotIdInput").value;
       const infoDiv = document.getElementById("summoner-info");
@@ -98,52 +100,15 @@
             </div>
           `;
 
-        matchHistoryHTML += `
-          <div class="match-card ${player.win ? 'win' : 'loss'}">
-            <div class="match-mode">
-              <div class="mode">${matchData.info.queueId === 420 ? 'Ranked' : 'Normal'}</div>
-              <div class="time">${new Date(matchData.info.gameCreation).toLocaleString()}</div>
-              <div class="duration">${Math.floor(matchData.info.gameDuration / 60)} Min</div>
-            </div>
+          matchHistoryHTML += teamAnalysisHTML;
+        }
 
-            <div class="champion-block">
-              <div class="champion">
-                <img class="champ-icon" src="${championIcon}" alt="${player.championName}" />
-                <div class="level">${player.champLevel}</div>
-              </div>
-              <div class="spells-runes">
-                <img class="spell" src="${summ1?.icon}" title="${summ1?.name}" />
-                <img class="spell" src="${summ2?.icon}" title="${summ2?.name}" />
-                ${runeImg(primaryRuneIcon)}${runeImg(secondaryRuneIcon)}
-              </div>
-            </div>
-
-            <div class="stats">
-              <div class="kda">${player.kills} / ${player.deaths} / ${player.assists}</div>
-              <div class="kda-ratio">${Math.round((player.kills + player.assists) / player.deaths)}:1 KDA</div>
-            </div>
-             <div class="teams">
-              <div class="team blue-team">${blueTeamHTML}</div>
-              <div class="team red-team">${redTeamHTML}</div>
-            </div>
-            <div class="items">
-              ${itemElements}
-            </div>
-          </div>
-        `;
-
-           matchHistoryHTML += teamAnalysisHTML;
+        matchHistoryDiv.innerHTML = matchHistoryHTML;
+      } catch (err) {
+        infoDiv.innerHTML = `<p style="color:red;">Fehler beim Laden der Daten: ${err.message}</p>`;
+        console.error("Fehler beim Laden:", err);
       }
     }
-
-    matchHistoryDiv.innerHTML = matchHistoryHTML;
-  } catch (err) {
-    infoDiv.innerHTML = infoDiv.innerHTML = `<p style="color:red;">Fehler beim Laden der Daten: ${err.message}</p>`;
-    console.error("Fehler beim Laden:", err);
-  }
-}
-
-
   </script>
 </body>
 </html>
