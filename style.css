@@ -29,6 +29,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  align-items: center;
 }
 
 .tabs {
@@ -57,7 +58,10 @@ body {
 
 .container {
   padding: 0;
+  max-width: 1200px;
+  margin: auto;
 }
+
 
 input, button {
   padding: 8px;
