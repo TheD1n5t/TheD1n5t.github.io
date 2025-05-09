@@ -1,26 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mächtiger Donut - LoL Stats</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="container">
-    <h1>LoL Stats per Riot ID</h1>
-    <input type="text" id="riotIdInput" placeholder="z. B. Mächtiger Donut#EUW" />
-    <button id="loadButton">Riot ID laden</button>
-
-    <div id="summoner-info">
-      <p>Bitte Riot ID eingeben.</p>
-    </div>
-
-    <div id="match-history">
-      <!-- Dynamische Match History wird hier geladen -->
-    </div>
-  </div>
-
+// ... (gleicher HTML-Kopf wie bisher)
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -103,17 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <a class='player-name' href='https://www.op.gg/summoners/euw/${nameEncoded}' target='_blank'>${name}</a>
     </div>`;
   }).join('');
-}.png`;
-    const name = p.riotIdGameName || p.summonerName || 'Unbekannt';
-    return `<div class='player'>
-      <img src='${champIcon}' title='${name}' class='mini-champ'>
-      <span class='player-name'>${name}</span>
-    </div>`;
-  }).join('');
-}.png`;
-            return `<div class='player'><img src='${champIcon}' title='${p.riotIdGameName || p.summonerName}' class='mini-champ'></div>`;
-          }).join('');
-        }
+}
 
         const durationMin = Math.floor(matchData.info.gameDuration / 60);
 
