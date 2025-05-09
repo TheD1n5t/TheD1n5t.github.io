@@ -48,6 +48,10 @@
     // Summoner-Daten abrufen
     const summRes = await fetch(`${proxyUrl}/summoner/by-puuid/${riotData.puuid}`);
     const summData = await summRes.json();
+    const rankedRes = await fetch(`${proxyUrl}/ranked/by-summoner/${summData.id}`);
+    const rankedData = await rankedRes.json();
+    const soloQ = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
+    const tier = soloQ ? `${soloQ.tier} ${soloQ.rank} – ${soloQ.leaguePoints} LP` : "Unranked";
     if (!summData.id || !summData.summonerLevel) throw new Error("Summoner-Daten unvollständig.");
 
     // Match-History (letzte 5 Spiele)
@@ -162,7 +166,7 @@
 
     matchHistoryDiv.innerHTML = matchHistoryHTML;
   } catch (err) {
-    infoDiv.innerHTML = `<p style='color: red;'>Fehler beim Laden der Daten:<br>${err.message}</p>`;
+    infoDiv.innerHTML = `<p><strong>${summData.name}</strong> (Level ${summData.summonerLevel})<br>Rang: ${tier}</p>`;
     console.error("Fehler beim Laden:", err);
   }
 }
