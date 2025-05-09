@@ -1,25 +1,98 @@
-const summonerName = "Mächtiger Donut"; // dein fest eingebauter Name
-const proxyUrl = "https://lol-api-proxy.onrender.com"; // später anpassen!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mächtiger Donut - LoL Stats</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background-color: #121212;
+      color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 3rem auto;
+      padding: 1rem;
+      background-color: #1e1e1e;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #ffcc00;
+    }
+    #summoner-info p {
+      text-align: center;
+      font-size: 1.2rem;
+    }
+    input, button {
+      display: block;
+      margin: 1rem auto;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: none;
+    }
+    input {
+      width: 80%;
+    }
+    button {
+      background-color: #ffcc00;
+      color: #121212;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>LoL Stats per Riot ID</h1>
+    <input type="text" id="riotIdInput" placeholder="z. B. Mächtiger Donut#EUW" />
+    <button onclick="loadByRiotId()">Riot ID laden</button>
+    <div id="summoner-info">
+      <p>Bitte Riot ID eingeben.</p>
+    </div>
+  </div>
 
-async function loadSummonerData() {
-  const infoDiv = document.getElementById("summoner-info");
-  infoDiv.innerHTML = "<p>Lade Daten...</p>";
+  <script>
+    async function loadByRiotId() {
+      const input = document.getElementById("riotIdInput").value;
+      const infoDiv = document.getElementById("summoner-info");
+      infoDiv.innerHTML = "<p>Lade Daten...</p>";
 
-  try {
-    const response = await fetch(`${proxyUrl}/summoner/${encodeURIComponent(summonerName)}`);
-    if (!response.ok) throw new Error("API Fehler");
+      const [gameName, tagLine] = input.split("#");
+      if (!gameName || !tagLine) {
+        infoDiv.innerHTML = "<p style='color: red;'>Bitte eine gültige Riot ID im Format Name#Tag eingeben.</p>";
+        return;
+      }
 
-    const data = await response.json();
-    infoDiv.innerHTML = `
-      <p><strong>Name:</strong> ${data.name}</p>
-      <p><strong>Level:</strong> ${data.summonerLevel}</p>
-      <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/profileicon/${data.profileIconId}.png" 
-           alt="Profile Icon" width="64" height="64" />
-    `;
-  } catch (err) {
-    infoDiv.innerHTML = "<p style='color: red;'>Fehler beim Laden der Daten.</p>";
-    console.error(err);
-  }
-}
+      try {
+        const proxyUrl = "https://lol-api-proxy.onrender.com";
+        const riotRes = await fetch(`${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`);
+        const riotData = await riotRes.json();
 
-loadSummonerData();
+        if (!riotRes.ok || riotData.status) throw new Error("Riot ID nicht gefunden");
+
+        const summRes = await fetch(`${proxyUrl}/summoner/by-puuid/${riotData.puuid}`);
+        const summData = await summRes.json();
+
+        if (!summRes.ok || summData.status) throw new Error("Summoner-Daten nicht gefunden");
+
+        infoDiv.innerHTML = `
+          <p><strong>Name:</strong> ${summData.name}</p>
+          <p><strong>Level:</strong> ${summData.summonerLevel}</p>
+          <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/profileicon/${summData.profileIconId}.png" 
+              alt="Profile Icon" width="64" height="64" />
+        `;
+      } catch (err) {
+        infoDiv.innerHTML = `<p style='color: red;'>Fehler beim Laden der Daten:<br>${err.message}</p>`;
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
