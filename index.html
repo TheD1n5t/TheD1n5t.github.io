@@ -86,24 +86,50 @@
           const visionRed = summarizeStat(teamRed, "visionScore");
 
           const teamAnalysisHTML = `
-            <div class="team-analysis">
-              <h4>Team-Analyse</h4>
-              <table>
-                <tr><th>Stat</th><th style="color:#38f;">Blau</th><th style="color:#f44;">Rot</th></tr>
-                <tr><td>Kills</td><td>${killsBlue}</td><td>${killsRed}</td></tr>
-                <tr><td>Gold</td><td>${goldBlue}</td><td>${goldRed}</td></tr>
-                <tr><td>Schaden</td><td>${dmgBlue}</td><td>${dmgRed}</td></tr>
-                <tr><td>Erlittener Schaden</td><td>${dmgTakenBlue}</td><td>${dmgTakenRed}</td></tr>
-                <tr><td>CS</td><td>${csBlue}</td><td>${csRed}</td></tr>
-                <tr><td>Wardscore</td><td>${visionBlue}</td><td>${visionRed}</td></tr>
-              </table>
+            <div class="team-analysis-wrapper">
+              <button class="toggle-analysis">Team-Analyse anzeigen ▼</button>
+              <div class="team-analysis" style="display:none">
+                <h4>Team-Analyse</h4>
+                <table>
+                  <tr><th>Stat</th><th style="color:#38f;">Blau</th><th style="color:#f44;">Rot</th></tr>
+                  <tr><td>Kills</td><td>${killsBlue}</td><td>${killsRed}</td></tr>
+                  <tr><td>Gold</td><td>${goldBlue}</td><td>${goldRed}</td></tr>
+                  <tr><td>Schaden</td><td>${dmgBlue}</td><td>${dmgRed}</td></tr>
+                  <tr><td>Erlittener Schaden</td><td>${dmgTakenBlue}</td><td>${dmgTakenRed}</td></tr>
+                  <tr><td>CS</td><td>${csBlue}</td><td>${csRed}</td></tr>
+                  <tr><td>Wardscore</td><td>${visionBlue}</td><td>${visionRed}</td></tr>
+                </table>
+              </div>
             </div>
           `;
 
-          matchHistoryHTML += teamAnalysisHTML;
+          const championIcon = `https://ddragon.leagueoflegends.com/cdn/15.9.1/img/champion/${player.championName}.png`;
+          const matchMainHTML = `
+            <div class="match-main">
+              <img class="champ-icon" src="${championIcon}" alt="${player.championName}" />
+              <div class="kda">${player.kills} / ${player.deaths} / ${player.assists}</div>
+              <div class="result">${player.win ? 'Sieg' : 'Niederlage'}</div>
+            </div>
+          `;
+
+          matchHistoryHTML += `
+            <div class="match-block">
+              ${matchMainHTML}
+              ${teamAnalysisHTML}
+            </div>
+          `;
         }
 
         matchHistoryDiv.innerHTML = matchHistoryHTML;
+
+        document.querySelectorAll('.toggle-analysis').forEach(button => {
+          button.addEventListener('click', () => {
+            const panel = button.nextElementSibling;
+            const visible = panel.style.display === 'block';
+            panel.style.display = visible ? 'none' : 'block';
+            button.innerHTML = visible ? 'Team-Analyse anzeigen ▼' : 'Team-Analyse verbergen ▲';
+          });
+        });
       } catch (err) {
         infoDiv.innerHTML = `<p style="color:red;">Fehler beim Laden der Daten: ${err.message}</p>`;
         console.error("Fehler beim Laden:", err);
