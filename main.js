@@ -1,5 +1,5 @@
 const summonerName = "GG Montı"; // dein fest eingebauter Name
-const proxyUrl = "https://dein-proxy.onrender.com"; // später anpassen!
+const proxyUrl = "https://lol-api-proxy.onrender.com"; // später anpassen!
 
 async function loadSummonerData() {
   const infoDiv = document.getElementById("summoner-info");
