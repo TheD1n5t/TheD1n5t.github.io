@@ -11,44 +11,13 @@
     <h1>LoL Stats per Riot ID</h1>
     <input type="text" id="riotIdInput" placeholder="z. B. Mächtiger Donut#EUW" />
     <button onclick="loadByRiotId()">Riot ID laden</button>
+
     <div id="summoner-info">
-      <div class="match-card loss">
-  <div class="match-mode">
-    <div class="mode">Solo/Duo<br><span>(Rangliste)</span></div>
-    <div class="time">vor 15 Stunden</div>
-    <div class="duration">29 Min. 23 Sek.</div>
-  </div>
-
-  <div class="champion-block">
-    <div class="champion">
-      <img class="champ-icon" src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/champion/Vayne.png" alt="Vayne">
-      <div class="level">15</div>
-    </div>
-    <div class="spells-runes">
-      <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/spell/SummonerFlash.png" />
-      <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/spell/SummonerHeal.png" />
-      <img class="rune" src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Precision/Precision.png" />
-      <img class="rune" src="https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Domination/Domination.png" />
-    </div>
-  </div>
-
-  <div class="stats">
-    <div class="kda"><strong>9</strong> / <strong class="death">10</strong> / <strong>8</strong></div>
-    <div class="kda-ratio">1.70:1 KDA</div>
-  </div>
-
-  <div class="items">
-    <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3153.png" />
-    <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3124.png" />
-    <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3006.png" />
-    <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/6673.png" />
-    <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/1055.png" />
-    <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/3363.png" />
-  </div>
-</div>
-
-
       <p>Bitte Riot ID eingeben.</p>
+    </div>
+
+    <div id="match-history">
+      <!-- Dynamische Match History wird hier geladen -->
     </div>
   </div>
 
@@ -56,6 +25,7 @@
     async function loadByRiotId() {
       const input = document.getElementById("riotIdInput").value;
       const infoDiv = document.getElementById("summoner-info");
+      const matchHistoryDiv = document.getElementById("match-history");
       infoDiv.innerHTML = "<p>Lade Daten...</p>";
 
       const [gameName, tagLine] = input.split("#");
@@ -67,58 +37,63 @@
       try {
         const proxyUrl = "https://lol-api-proxy.onrender.com";
 
+        // Riot ID abrufen
         const riotRes = await fetch(`${proxyUrl}/riotid/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`);
         const riotData = await riotRes.json();
         if (!riotData.puuid) throw new Error("Riot ID nicht gefunden.");
 
+        // Summoner-Daten abrufen
         const summRes = await fetch(`${proxyUrl}/summoner/by-puuid/${riotData.puuid}`);
         const summData = await summRes.json();
         if (!summData.id || !summData.summonerLevel) throw new Error("Summoner-Daten unvollständig.");
-
-        // Ranked Stats abrufen
-        const rankedRes = await fetch(`${proxyUrl}/ranked/by-summoner/${summData.id}`);
-        const rankedData = await rankedRes.json();
-
-        let rankedInfo = "<p><em>Keine Ranked-Daten verfügbar.</em></p>";
-        if (Array.isArray(rankedData)) {
-          const soloQueue = rankedData.find(entry => entry.queueType === "RANKED_SOLO_5x5");
-          if (soloQueue) {
-            const { tier, rank, leaguePoints, wins, losses } = soloQueue;
-            const winrate = Math.round((wins / (wins + losses)) * 100);
-            rankedInfo = `
-              <p><strong>Rang:</strong> ${tier} ${rank} – ${leaguePoints} LP</p>
-              <p><strong>Wins:</strong> ${wins} – <strong>Losses:</strong> ${losses}</p>
-              <p><strong>Winrate:</strong> ${winrate}%</p>
-            `;
-          }
-        } else {
-          console.warn("Ranked API Antwort war kein Array:", rankedData);
-        }
 
         // Match-History (letzte 5 Spiele)
         const matchIdsRes = await fetch(`${proxyUrl}/matches/by-puuid/${riotData.puuid}?count=5`);
         const matchIds = await matchIdsRes.json();
 
-        let matchHistory = "<p><strong>Letzte Spiele:</strong></p><ul>";
+        let matchHistoryHTML = "<h2>Letzte Spiele:</h2>";
         for (const matchId of matchIds) {
           const matchRes = await fetch(`${proxyUrl}/match/${matchId}`);
           const matchData = await matchRes.json();
           const player = matchData.info.participants.find(p => p.puuid === riotData.puuid);
+
           if (player) {
             const result = player.win ? "<span style='color:lightgreen;'>Sieg</span>" : "<span style='color:orangered;'>Niederlage</span>";
-            matchHistory += `<li>${player.championName} – ${player.kills}/${player.deaths}/${player.assists} – ${result}</li>`;
+            const championIcon = `https://ddragon.leagueoflegends.com/cdn/13.24.1/img/champion/${player.championName}.png`;
+            
+            matchHistoryHTML += `
+              <div class="match-card ${player.win ? 'win' : 'loss'}">
+                <div class="match-mode">
+                  <div class="mode">${matchData.info.queueId === 420 ? 'Ranked' : 'Normal'}</div>
+                  <div class="time">${new Date(matchData.info.gameCreation).toLocaleString()}</div>
+                  <div class="duration">${Math.floor(matchData.info.gameDuration / 60)} Min</div>
+                </div>
+
+                <div class="champion-block">
+                  <div class="champion">
+                    <img class="champ-icon" src="${championIcon}" alt="${player.championName}" />
+                    <div class="level">${player.championLevel}</div>
+                  </div>
+                  <div class="spells-runes">
+                    <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/spell/${player.summoner1Id}.png" />
+                    <img class="spell" src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/spell/${player.summoner2Id}.png" />
+                  </div>
+                </div>
+
+                <div class="stats">
+                  <div class="kda">${player.kills} / ${player.deaths} / ${player.assists}</div>
+                  <div class="kda-ratio">${Math.round((player.kills + player.assists) / player.deaths)}:1 KDA</div>
+                </div>
+
+                <div class="items">
+                  ${player.items.map(itemId => `<img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/item/${itemId}.png" />`).join('')}
+                </div>
+              </div>
+            `;
           }
         }
-        matchHistory += "</ul>";
 
-        infoDiv.innerHTML = `
-          <p><strong>Name:</strong> ${riotData.gameName}</p>
-          <p><strong>Level:</strong> ${summData.summonerLevel}</p>
-          <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/profileicon/${summData.profileIconId}.png" 
-              alt="Profile Icon" width="64" height="64" />
-          <div style="margin-top: 1rem;">${rankedInfo}</div>
-          <div style="margin-top: 1rem;">${matchHistory}</div>
-        `;
+        matchHistoryDiv.innerHTML = matchHistoryHTML;
       } catch (err) {
         infoDiv.innerHTML = `<p style='color: red;'>Fehler beim Laden der Daten:<br>${err.message}</p>`;
         console.error("Fehler beim Laden:", err);
